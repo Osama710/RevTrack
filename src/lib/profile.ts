@@ -8,7 +8,10 @@ type Client = Awaited<ReturnType<typeof createClient>>;
 export async function getProfile(supabase: Client, userId?: string) {
   let q = supabase.from("profiles").select("display_name, currency");
   if (userId) q = q.eq("id", userId);
-  const { data } = await q.maybeSingle();
+  const { data, error } = await q.maybeSingle();
+  if (error) {
+    return { displayName: null, currency: "Rs" as const };
+  }
   return {
     displayName: (data?.display_name ?? null) as string | null,
     currency: (data?.currency ?? "Rs") as string,

@@ -1,7 +1,13 @@
 "use client";
 
-import { createContext, useContext } from "react";
+import { createContext, useContext, type ReactNode } from "react";
 
-const Ctx = createContext<{ name: string | null }>({ name: null });
-export const ProfileProvider = Ctx.Provider;
-export const useProfile = () => useContext(Ctx);
+const ProfileContext = createContext<{ name: string | null }>({ name: null });
+
+export function ProfileProvider({ children, name }: { children: ReactNode; name: string | null }) {
+  return <ProfileContext.Provider value={{ name }}>{children}</ProfileContext.Provider>;
+}
+
+export function useProfile() {
+  return useContext(ProfileContext);
+}

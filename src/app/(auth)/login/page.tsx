@@ -1,6 +1,5 @@
 import AuthShell, { AuthSwitchLink } from "@/components/auth/AuthShell";
-import { signIn } from "../actions";
-import { Field, buttonClass, inputClass } from "@/components/ui/form";
+import SignInForm from "@/components/auth/SignInForm";
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string; message?: string }> }) {
   const sp = await searchParams;
@@ -17,30 +16,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         </>
       }
     >
-      <form action={signIn} className="space-y-5">
-        <Field label="Email">
-          <input
-            name="email"
-            type="email"
-            required
-            autoComplete="email"
-            inputMode="email"
-            placeholder="you@example.com"
-            className={inputClass}
-          />
-        </Field>
-        <Field label="Password">
-          <input
-            name="password"
-            type="password"
-            required
-            autoComplete="current-password"
-            placeholder="••••••••"
-            className={inputClass}
-          />
-        </Field>
-        <button type="submit" className={buttonClass}>Enter RevTrack</button>
-      </form>
+      <SignInForm />
     </AuthShell>
   );
 }

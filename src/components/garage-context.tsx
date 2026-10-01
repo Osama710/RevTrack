@@ -69,6 +69,8 @@ export function GarageProvider({ vehicles, children }: { vehicles: Vehicle[]; ch
 
 export function useGarage(): Garage {
   const ctx = useContext(Ctx);
-  if (!ctx) throw new Error("useGarage must be used inside GarageProvider");
+  if (!ctx) {
+    throw new Error("useGarage must be used inside GarageProvider");
+  }
   return ctx;
 }
