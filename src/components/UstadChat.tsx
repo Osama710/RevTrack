@@ -60,7 +60,7 @@ export default function UstadChat({ initial, clearAction }: { initial: Msg[]; cl
 
       <div role="log" aria-live="polite" className="flex-1 space-y-3 overflow-y-auto px-5 pb-4">
         {msgs.length === 0 && (
-          <div className="rounded-2xl border border-line bg-obsidian-900 p-4">
+          <div className="cut p-4">
             <p className="font-mono text-sm text-mint">ustad@revtrack:~$</p>
             <p className="mt-2 text-sm text-dim">Assalam o alaikum. Gaari ka masla Roman-Urdu mein likhein, ya neeche se chunein.</p>
             <div className="mt-3 flex flex-wrap gap-2">

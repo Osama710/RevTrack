@@ -40,22 +40,22 @@ export default async function VehiclePage({ params }: { params: Promise<{ id: st
       {subtitle && <p className="-mt-4 mb-4 text-sm text-dim">{subtitle}</p>}
 
       <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-2xl border border-line bg-obsidian-900 p-4">
+        <div className="cut p-4">
           <p className="text-sm text-dim">Odometer</p>
           <p className="mt-1 font-display text-2xl font-bold tabular-nums">{km(vehicle.current_mileage)} <span className="text-base font-medium text-dim">km</span></p>
         </div>
-        <div className="rounded-2xl border border-line bg-obsidian-900 p-4">
+        <div className="cut p-4">
           <p className="text-sm text-dim">Total spent</p>
           <p className="mt-1 font-display text-2xl font-bold tabular-nums">{profile.currency} {spent.toLocaleString("en-US")}</p>
         </div>
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-3">
-        <div className="rounded-2xl border border-line bg-obsidian-900 p-4">
+        <div className="cut p-4">
           <p className="text-sm text-dim">Driven this month</p>
           <p className="mt-1 font-display text-xl font-bold tabular-nums">{kmThisMonth === null ? "Not enough data" : `${km(kmThisMonth)} km`}</p>
         </div>
-        <div className="rounded-2xl border border-line bg-obsidian-900 p-4">
+        <div className="cut p-4">
           <p className="text-sm text-dim">Average per day</p>
           <p className="mt-1 font-display text-xl font-bold tabular-nums">{kmPerDay === null ? "Not enough data" : `${km(kmPerDay)} km`}</p>
         </div>

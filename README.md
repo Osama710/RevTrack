@@ -1,37 +1,101 @@
 # RevTrack
 
-Mobile-first PWA for tracking car and bike maintenance, spending, fuel, papers and reminders. Next.js 15, Supabase (Auth, Postgres with RLS, private Storage), Tailwind v4, GSAP, Framer Motion.
+**RevTrack** is a mobile-first progressive web app for Gen Z drivers in Pakistan (and beyond) to manage cars and bikes: maintenance, fuel, spending, documents, and reminders—in one place with a fast, animated UI.
 
-## Deploy without running anything locally
+## Features
 
-1. **Supabase SQL Editor**: run these files in order (each once)
-   `supabase/migrations/0001_init.sql`, `0002_profiles.sql`, `0003_odometer.sql`, `0004_garage_suite.sql`
-   (skip any you already ran).
-2. **GitHub**: unzip, then drag the contents of the `revtrack` folder into the repo (Add file > Upload files) and commit to `main`. Existing files are overwritten.
-3. **Vercel environment variables** (Project Settings > Environment Variables), then redeploy:
+- **Dashboard** — Odometer, oil/brake/suspension gauges, spend stats, service predictions, tasks, and recent activity per vehicle.
+- **Garage** — Separate **cars** and **bikes**, quick vehicle switcher, document wallet, and links into each vehicle’s detail page.
+- **Ledger** — Maintenance logs, fuel entries, and category breakdown (maintenance, tuning, parts, fuel).
+- **Alerts** — Due/overdue services, documents, tasks; optional **web push** reminders.
+- **Excise Safe Mode** — Offline-friendly view of licence, registration, and token tax info when you need papers on the road.
+- **AI Ustad** — Roman-Urdu friendly chat (Google Gemini) for common vehicle problems.
+- **SOS share** — Generate a shareable image with vehicle and emergency contact details.
+- **PWA** — Install to home screen, service worker caching, offline fallback page.
 
-| Name | Where it comes from |
-|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase > Project Settings > API |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | same page, `anon` key |
-| `SUPABASE_SERVICE_ROLE_KEY` | same page, `service_role` key. Server only, never share it |
-| `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | push keys; subject like `mailto:you@example.com` |
-| `CRON_SECRET` | any long random string |
-| `GEMINI_API_KEY` | free key from https://aistudio.google.com/apikey |
-| `GEMINI_MODEL` | optional, default `gemini-2.5-flash` |
+## Tech stack
 
-4. **Supabase > Authentication > URL Configuration**: Site URL = your Vercel URL, and add `https://your-app.vercel.app/**` to Redirect URLs.
-5. **Phone**: open the site in Chrome, menu > Install app, then Alerts tab > Turn on notifications.
+| Layer | Choice |
+|--------|--------|
+| Framework | [Next.js 15](https://nextjs.org/) (App Router, React 19) |
+| Backend | [Supabase](https://supabase.com/) — Auth, Postgres + RLS, Storage |
+| Styling | [Tailwind CSS v4](https://tailwindcss.com/) |
+| Motion | [GSAP](https://gsap.com/) + [@gsap/react](https://gsap.com/docs/v3/Plugins/React/), Framer Motion (layout) |
+| Deploy | [Vercel](https://vercel.com/) (cron for daily reminders) |
 
-## Where things are
+## Getting started
+
+**Requirements:** Node.js **22+** recommended (Supabase client targets Node 22; Node 20 may still work with warnings).
+
+```bash
+git clone https://github.com/<your-org>/RevTrack.git
+cd RevTrack
+npm install
 ```
-public/                 manifest, service worker (cache + push), offline page, icons
-supabase/migrations/    SQL: tables, RLS on every table, private storage bucket
-vercel.json             daily reminder cron (04:00 UTC, 09:00 Karachi)
-src/middleware.ts       session refresh and route gate
-src/app/(app)/          dashboard, ledger, garage, notifications, ustad, forms, settings
-src/app/excise/         Excise Safe Mode (offline-capable shell)
-src/app/api/            documents image, excise snapshot, push, cron, ustad
-src/components/         Dashboard, FinancialLedger, Gauge, nav, forms, SosShare, ExciseView
-src/lib/                predictions, ledger maths, alerts, push, AI, offline store
+
+Copy environment variables (see below) into `.env.local`, then:
+
+```bash
+npm run dev
 ```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+### Environment variables
+
+| Variable | Description |
+|----------|-------------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase `anon` key (client) |
+| `SUPABASE_SERVICE_ROLE_KEY` | `service_role` key — **server only**, never expose to the client |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | Web Push VAPID public key |
+| `VAPID_PRIVATE_KEY` | Web Push VAPID private key |
+| `VAPID_SUBJECT` | e.g. `mailto:you@example.com` |
+| `CRON_SECRET` | Secret for `/api/cron/reminders` |
+| `GEMINI_API_KEY` | [Google AI Studio](https://aistudio.google.com/apikey) key for AI Ustad |
+| `GEMINI_MODEL` | Optional; default `gemini-2.5-flash` |
+
+### Database
+
+Run migrations in order in the **Supabase SQL Editor** (once per project):
+
+1. `supabase/migrations/0001_init.sql`
+2. `supabase/migrations/0002_profiles.sql`
+3. `supabase/migrations/0003_odometer.sql`
+4. `supabase/migrations/0004_garage_suite.sql`
+
+In **Authentication → URL Configuration**, set **Site URL** to your app URL and add redirect URLs (e.g. `https://your-app.vercel.app/**` and `http://localhost:3000/**` for local auth).
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Production build |
+| `npm run start` | Run production server locally |
+
+## Project layout
+
+```
+public/                 PWA manifest, service worker, offline page, icons
+supabase/migrations/    Schema, RLS, storage policies
+vercel.json             Cron: daily reminders (04:00 UTC)
+src/app/(app)/          Authenticated app: dashboard, ledger, garage, alerts, settings, forms
+src/app/(auth)/         Login and signup
+src/app/excise/         Excise Safe Mode (works offline)
+src/app/api/            Documents, excise snapshot, push, cron, AI Ustad
+src/components/         UI, dashboard, nav, forms, gauges, ledger
+src/lib/                Predictions, ledger, alerts, push, AI, auth helpers
+src/middleware.ts       Session refresh and protected routes
+```
+
+## Deploy on Vercel
+
+1. Import the GitHub repo into Vercel.
+2. Add all environment variables from the table above.
+3. Deploy; confirm the cron in `vercel.json` is enabled on your plan.
+4. On a phone: open the site in Chrome → **Install app**; in **Alerts**, enable push notifications.
+
+## License
+
+Private / all rights reserved unless you add an open-source license file.

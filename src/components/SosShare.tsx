@@ -54,9 +54,9 @@ export default function SosShare({ vehicle }: { vehicle: V }) {
     c.height = H;
     const g = c.getContext("2d");
     if (!g) return;
-    g.fillStyle = "#050506";
+    g.fillStyle = "#07070c";
     g.fillRect(0, 0, W, H);
-    g.fillStyle = "#ff3366";
+    g.fillStyle = "#ff3d6e";
     g.fillRect(0, 0, W, 170);
     g.fillStyle = "#f5f5f5";
     g.font = "bold 64px system-ui, sans-serif";
@@ -70,7 +70,7 @@ export default function SosShare({ vehicle }: { vehicle: V }) {
       g.font = "bold 46px system-ui, sans-serif";
       g.fillText(v.length > 34 ? `${v.slice(0, 33)}...` : v, 60, y + 52);
     });
-    g.fillStyle = "#00f5a0";
+    g.fillStyle = "#c8ff2e";
     g.font = "30px system-ui, sans-serif";
     g.fillText("Report to Police (15) or your nearest CPLC office", 60, H - 50);
 

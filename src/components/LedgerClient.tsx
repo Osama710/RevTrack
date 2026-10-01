@@ -73,10 +73,10 @@ function LedgerBody({ vehicle, logs, fuel, readings, currency }: Props & { vehic
       <p className="mb-4 text-sm text-dim">{vehicle.name}</p>
 
       <div className="mb-4 grid grid-cols-2 gap-3">
-        <Link href={`/logs/new?vehicle=${vehicle.id}&type=fuel`} className="flex min-h-14 items-center gap-3 rounded-2xl border border-line bg-obsidian-900 px-4 font-semibold active:bg-obsidian-800">
+        <Link href={`/logs/new?vehicle=${vehicle.id}&type=fuel`} className="flex min-h-14 items-center gap-3 cut px-4 font-semibold active:bg-obsidian-800">
           <IconFuel className="size-5 text-mint" /> Fuel up
         </Link>
-        <Link href={`/logs/new?vehicle=${vehicle.id}`} className="flex min-h-14 items-center gap-3 rounded-2xl border border-line bg-obsidian-900 px-4 font-semibold active:bg-obsidian-800">
+        <Link href={`/logs/new?vehicle=${vehicle.id}`} className="flex min-h-14 items-center gap-3 cut px-4 font-semibold active:bg-obsidian-800">
           <IconPlus className="size-5 text-mint" /> Add expense
         </Link>
       </div>

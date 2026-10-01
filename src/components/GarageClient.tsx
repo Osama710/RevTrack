@@ -47,7 +47,7 @@ function GarageBody({ kind, vehicles, vehicle, docs }: { kind: "car" | "bike"; v
         </span>
         <IconChevron className="ml-auto size-5 text-dim" />
       </a>
-      <Link href="/ustad" className="mt-3 flex min-h-14 items-center gap-3 rounded-2xl border border-line bg-obsidian-900 px-4 font-semibold active:bg-obsidian-800">
+      <Link href="/ustad" className="mt-3 flex min-h-14 items-center gap-3 cut px-4 font-semibold active:bg-obsidian-800">
         <IconChat className="size-5 text-mint" /> Ask AI Ustad about a problem
       </Link>
 
@@ -58,7 +58,7 @@ function GarageBody({ kind, vehicles, vehicle, docs }: { kind: "car" | "bike"; v
         <ul className="mt-3 space-y-2">
           {vehicles.map((v) => (
             <li key={v.id}>
-              <Link href={`/vehicles/${v.id}`} className="flex min-h-20 items-center gap-3 rounded-2xl border border-line bg-obsidian-900 px-4 py-3 active:bg-obsidian-800">
+              <Link href={`/vehicles/${v.id}`} className="flex min-h-20 items-center gap-3 cut px-4 py-3 active:bg-obsidian-800">
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-display text-lg font-semibold">{v.name}</span>
                   <span className="block text-sm text-dim">

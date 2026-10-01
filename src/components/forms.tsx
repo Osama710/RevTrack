@@ -215,7 +215,7 @@ export function FuelForm({
         <datalist id="karachi-areas">{KARACHI_AREAS.map((s) => <option key={s} value={s} />)}</datalist>
       </Field>
       <label className="flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border border-line px-4">
-        <input type="checkbox" name="full_tank" defaultChecked={defaults.full_tank ?? true} className="size-5 accent-[#00f5a0]" />
+        <input type="checkbox" name="full_tank" defaultChecked={defaults.full_tank ?? true} className="size-5 accent-[#c8ff2e]" />
         <span>
           <span className="block text-sm font-semibold">Filled to the brim</span>
           <span className="block text-xs text-dim">Needed to measure km/L accurately.</span>

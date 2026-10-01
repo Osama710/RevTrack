@@ -82,7 +82,7 @@ export default function PushToggle({ publicKey }: { publicKey: string }) {
   };
 
   return (
-    <section className="rounded-2xl border border-line bg-obsidian-900 p-4">
+    <section className="cut p-4">
       <h2 className="font-display text-lg font-semibold">Push reminders</h2>
       <p className="mt-1 text-sm text-dim">{note[state]}</p>
       {(state === "off" || state === "on") && (

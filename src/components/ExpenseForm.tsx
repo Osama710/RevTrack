@@ -33,7 +33,7 @@ export default function ExpenseForm({
 
   return (
     <div>
-      <div role="tablist" aria-label="Expense type" className="grid grid-cols-4 gap-1 rounded-2xl border border-line bg-obsidian-900 p-1">
+      <div role="tablist" aria-label="Expense type" className="grid grid-cols-4 gap-1 cut p-1">
         {MODES.map((m) => (
           <button
             key={m}

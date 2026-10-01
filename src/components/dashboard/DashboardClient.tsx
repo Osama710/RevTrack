@@ -23,7 +23,7 @@ import type { FuelEntry, LogEntry, Reading, Task, Vehicle } from "@/types/db";
 
 gsap.registerPlugin(useGSAP);
 
-const MINT = "#00f5a0";
+const MINT = "#c8ff2e";
 type Result = { ok: true } | { ok: false; error: string };
 
 interface Props {
@@ -154,16 +154,16 @@ function DashboardBody({ vehicle, logs, fuel, readings, tasks, currency, license
       mm.add("(prefers-reduced-motion: no-preference)", () => {
         gsap
           .timeline({ defaults: { ease: "power3.out" } })
-          .from("[data-hero]", { autoAlpha: 0, y: 18, duration: 0.5, clearProps: "opacity,visibility,transform" })
-          .from("[data-stat]", { autoAlpha: 0, y: 24, scale: 0.97, duration: 0.55, stagger: 0.09, clearProps: "opacity,visibility,transform" }, "-=0.25")
-          .from("[data-reveal]", { autoAlpha: 0, y: 16, duration: 0.5, stagger: 0.07, clearProps: "opacity,visibility,transform" }, "-=0.3");
+          .from("[data-hero]", { autoAlpha: 0, y: 14, duration: 0.3, clearProps: "opacity,visibility,transform" })
+          .from("[data-stat]", { autoAlpha: 0, y: 18, scale: 0.96, duration: 0.35, stagger: 0.05, clearProps: "opacity,visibility,transform" }, "-=0.2")
+          .from("[data-reveal]", { autoAlpha: 0, y: 12, duration: 0.3, stagger: 0.04, clearProps: "opacity,visibility,transform" }, "-=0.2");
 
         const el = odo.current;
         if (el) {
           const counter = { v: 0 };
           gsap.to(counter, {
             v: vehicle.current_mileage,
-            duration: 0.9,
+            duration: 0.7,
             ease: "power2.out",
             onUpdate: () => {
               el.textContent = km(counter.v);
@@ -218,17 +218,18 @@ function DashboardBody({ vehicle, logs, fuel, readings, tasks, currency, license
   return (
     <div ref={root}>
       {/* Hero */}
-      <section data-hero className="mt-3">
+      <section data-hero className="cut cut-lg cut-hero relative mt-3 p-5">
+        <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 size-40 rounded-full bg-violet/30 blur-3xl" />
         <Link href={`/vehicles/${id}`} className="inline-flex min-h-11 items-center gap-1">
-          <h1 className="font-display text-2xl font-semibold">{vehicle.name}</h1>
-          <IconChevron className="size-5 text-dim" />
+          <h1 className="font-display text-2xl font-bold uppercase tracking-wide">{vehicle.name}</h1>
+          <IconChevron className="size-5 text-mint" />
         </Link>
         <p className="text-sm text-dim">{[vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ") || vehicle.plate || "Odometer"}</p>
         <div className="mt-3 flex items-baseline gap-2">
-          <span key={`${id}-${vehicle.current_mileage}`} ref={odo} suppressHydrationWarning className="font-display text-6xl font-bold leading-none tabular-nums">
+          <span key={`${id}-${vehicle.current_mileage}`} ref={odo} suppressHydrationWarning className="text-grad font-display text-6xl font-bold leading-none tabular-nums">
             {km(vehicle.current_mileage)}
           </span>
-          <span className="text-lg text-dim">km</span>
+          <span className="font-display text-lg text-dim">KM</span>
         </div>
         <p className="mt-2 text-sm text-dim">
           {kmPerDay === null ? "Update your odometer to see your pace." : `About ${Math.round(kmPerDay)} km a day lately`}
@@ -236,7 +237,7 @@ function DashboardBody({ vehicle, logs, fuel, readings, tasks, currency, license
       </section>
 
       {/* Telemetry gauges */}
-      <section data-stat className="mt-6 rounded-2xl border border-line bg-obsidian-900 p-4">
+      <section data-stat className="mt-6 cut p-4">
         <div className="grid grid-cols-3 gap-2">
           <Gauge
             label="Oil life"
@@ -262,15 +263,15 @@ function DashboardBody({ vehicle, logs, fuel, readings, tasks, currency, license
 
       {/* Money */}
       <section className="mt-3 grid grid-cols-3 gap-3">
-        <div data-stat className="rounded-2xl border border-line bg-obsidian-900 p-3">
+        <div data-stat className="cut p-3">
           <p className="text-xs text-dim">This month</p>
           <p className="mt-1 font-display text-lg font-bold tabular-nums">{money(ledger.thisMonth, currency)}</p>
         </div>
-        <div data-stat className="rounded-2xl border border-line bg-obsidian-900 p-3">
+        <div data-stat className="cut p-3">
           <p className="text-xs text-dim">Monthly avg</p>
           <p className="mt-1 font-display text-lg font-bold tabular-nums">{money(ledger.avgMonthly, currency)}</p>
         </div>
-        <div data-stat className="rounded-2xl border border-line bg-obsidian-900 p-3">
+        <div data-stat className="cut p-3">
           <p className="text-xs text-dim">Per km</p>
           <p className="mt-1 font-display text-lg font-bold tabular-nums">{perKm === null ? "-" : `${currency} ${perKm.toFixed(1)}`}</p>
         </div>
@@ -280,9 +281,9 @@ function DashboardBody({ vehicle, logs, fuel, readings, tasks, currency, license
       <a
         data-reveal
         href="/excise"
-        className="mt-4 flex min-h-20 items-center gap-4 rounded-2xl border border-mint/40 bg-obsidian-900 px-4 transition-colors active:bg-obsidian-800"
+        className="mt-4 flex cut cut-hot min-h-20 items-center gap-4 px-4"
       >
-        <span className="grid size-12 shrink-0 place-items-center rounded-full bg-mint text-obsidian-950">
+        <span className="cut cut-sm cut-lime grid size-12 shrink-0 place-items-center">
           <IconShield />
         </span>
         <span className="min-w-0">
@@ -300,7 +301,7 @@ function DashboardBody({ vehicle, logs, fuel, readings, tasks, currency, license
           { href: `/vehicles/${id}/odometer`, label: "Odometer", Icon: IconOdo },
           { href: "/ustad", label: "AI Ustad", Icon: IconChat },
         ].map(({ href, label, Icon }) => (
-          <Link key={label} href={href} className="flex min-h-14 items-center gap-3 rounded-2xl border border-line bg-obsidian-900 px-4 font-semibold transition-colors active:bg-obsidian-800">
+          <Link key={label} href={href} className="flex min-h-14 items-center gap-3 cut px-4 font-semibold transition-colors active:bg-obsidian-800">
             <Icon className="size-5 text-mint" />
             {label}
           </Link>
@@ -309,11 +310,11 @@ function DashboardBody({ vehicle, logs, fuel, readings, tasks, currency, license
 
       {/* Predictions */}
       <section data-reveal className="mt-10">
-        <h2 className="font-display text-lg font-semibold">Coming up</h2>
+        <h2 className="h-sec">Coming up</h2>
         {predictions.length === 0 ? (
           <p className="mt-2 text-sm text-dim">Log the same service twice and RevTrack learns how often you do it.</p>
         ) : (
-          <ul className="mt-3 divide-y divide-line rounded-2xl border border-line bg-obsidian-900">
+          <ul className="mt-3 divide-y divide-line cut">
             {predictions.slice(0, 4).map((p) => (
               <li key={p.serviceType} className="flex items-center justify-between gap-4 px-4 py-3.5">
                 <div className="min-w-0">
@@ -340,7 +341,7 @@ function DashboardBody({ vehicle, logs, fuel, readings, tasks, currency, license
       {/* Checklist */}
       <section data-reveal className="mt-10">
         <div className="flex items-center justify-between">
-          <h2 className="font-display text-lg font-semibold">To do</h2>
+          <h2 className="h-sec">To do</h2>
           <Link href={`/tasks/new?vehicle=${id}`} className="inline-flex min-h-11 items-center text-sm font-semibold text-mint">
             Add task
           </Link>
@@ -357,11 +358,11 @@ function DashboardBody({ vehicle, logs, fuel, readings, tasks, currency, license
                     type="button"
                     onClick={(e) => complete(t, e.currentTarget)}
                     aria-label={`Mark ${t.title} done`}
-                    className="flex min-h-16 w-full items-center gap-4 rounded-2xl border border-line bg-obsidian-900 px-4 py-2 text-left transition-colors active:bg-obsidian-800"
+                    className="flex min-h-16 w-full items-center gap-4 cut px-4 py-2 text-left transition-colors active:bg-obsidian-800"
                   >
                     <span data-ring className="grid size-8 shrink-0 place-items-center rounded-full border-2 border-dim">
                       <svg viewBox="0 0 24 24" className="size-5" fill="none" aria-hidden>
-                        <path data-check d="M5 12.5l4.5 4.5L19 7.5" stroke="#050506" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" opacity="0" />
+                        <path data-check d="M5 12.5l4.5 4.5L19 7.5" stroke="#07070c" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" opacity="0" />
                       </svg>
                     </span>
                     <span className="min-w-0">
@@ -386,7 +387,7 @@ function DashboardBody({ vehicle, logs, fuel, readings, tasks, currency, license
             <form key={k} action={addChecklist}>
               <input type="hidden" name="vehicle_id" value={id} />
               <input type="hidden" name="checklist" value={k} />
-              <button type="submit" className="flex min-h-12 w-full items-center justify-center rounded-xl border border-line px-3 text-center text-sm font-semibold transition-colors active:bg-obsidian-800">
+              <button type="submit" className="flex min-h-12 w-full items-center justify-center cut cut-sm px-3 text-center text-sm font-semibold">
                 {CHECKLISTS[k].title}
               </button>
             </form>
@@ -398,7 +399,7 @@ function DashboardBody({ vehicle, logs, fuel, readings, tasks, currency, license
       {/* Recent */}
       <section data-reveal className="mt-10">
         <div className="flex items-center justify-between">
-          <h2 className="font-display text-lg font-semibold">Recent activity</h2>
+          <h2 className="h-sec">Recent activity</h2>
           <Link href="/ledger" className="inline-flex min-h-11 items-center text-sm font-semibold text-mint">
             Ledger
           </Link>
@@ -409,7 +410,7 @@ function DashboardBody({ vehicle, logs, fuel, readings, tasks, currency, license
           <ul className="mt-2 space-y-2">
             {recent.map((r) => (
               <li key={r.id}>
-                <Link href={r.href} className="flex min-h-16 items-center gap-3 rounded-2xl border border-line px-4 py-3 transition-colors active:bg-obsidian-800">
+                <Link href={r.href} className="cut flex min-h-16 items-center gap-3 px-4 py-3">
                   <span className="size-2.5 shrink-0 rounded-full" style={{ background: r.color }} aria-hidden />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate font-semibold">{r.title}</span>

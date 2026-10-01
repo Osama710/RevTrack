@@ -11,11 +11,22 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
   const { supabase, user } = await requireUser();
   const profile = await getProfile(supabase);
 
+  const initial = (profile.displayName?.trim()[0] ?? user.email?.[0] ?? "R").toUpperCase();
+
   return (
     <FormPage title="Settings" error={sp.error} message={sp.message}>
+      <section className="cut cut-lg cut-hero relative mb-8 flex items-center gap-4 p-5">
+        <span className="grid size-16 shrink-0 place-items-center bg-obsidian-950/80 font-display text-2xl font-bold text-grad [clip-path:polygon(0_0,calc(100%-12px)_0,100%_12px,100%_100%,12px_100%,0_calc(100%-12px))]">
+          {initial}
+        </span>
+        <div className="min-w-0">
+          <p className="font-display text-xl font-bold">{profile.displayName ?? "Rider"}</p>
+          <p className="truncate text-sm text-dim">{user.email}</p>
+          <p className="mt-1 text-xs text-mint">{profile.currency} · Tap avatar on Home anytime</p>
+        </div>
+      </section>
       <section>
-        <h2 className="font-display text-lg font-semibold">Profile</h2>
-        <p className="mt-1 break-all text-sm text-dim">{user.email}</p>
+        <h2 className="h-sec">Edit profile</h2>
         <form action={updateProfile} className="mt-4 space-y-5">
           <Field label="Name">
             <input name="display_name" maxLength={60} defaultValue={profile.displayName ?? ""} autoComplete="name" className={inputClass} />
@@ -32,18 +43,18 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
       </section>
 
       <section className="mt-10">
-        <h2 className="font-display text-lg font-semibold">Password</h2>
+        <h2 className="h-sec">Password</h2>
         <form action={updatePassword} className="mt-4 space-y-5">
           <Field label="New password" hint="At least 8 characters.">
             <input name="password" type="password" required minLength={8} autoComplete="new-password" className={inputClass} />
           </Field>
-          <button type="submit" className="h-14 w-full rounded-full border border-line font-display text-lg font-semibold transition-transform active:scale-[0.98]">Update password</button>
+          <button type="submit" className="btn-cut-ghost h-14 w-full text-lg font-semibold">Update password</button>
         </form>
       </section>
 
       <section className="mt-10 grid gap-2">
-        <Link href="/vehicles/new" className="flex h-14 items-center rounded-2xl border border-line px-4 font-semibold active:bg-obsidian-800">Add a vehicle</Link>
-        <Link href="/tasks/new" className="flex h-14 items-center rounded-2xl border border-line px-4 font-semibold active:bg-obsidian-800">Add a task</Link>
+        <Link href="/vehicles/new" className="cut flex h-14 items-center px-4 font-semibold">Add a vehicle</Link>
+        <Link href="/tasks/new" className="cut flex h-14 items-center px-4 font-semibold">Add a task</Link>
       </section>
 
       <SignOutForm action={signOut} />

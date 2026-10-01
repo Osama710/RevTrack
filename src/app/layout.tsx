@@ -18,7 +18,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover", // lets the dock sit under the home indicator via safe-area insets
-  themeColor: "#050506",
+  themeColor: "#07070c",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

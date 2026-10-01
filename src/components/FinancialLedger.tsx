@@ -8,7 +8,7 @@ import { money } from "@/lib/format";
 
 gsap.registerPlugin(useGSAP);
 
-const card = "rounded-2xl border border-line bg-obsidian-900";
+const card = "cut";
 
 function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (

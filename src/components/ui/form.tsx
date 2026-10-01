@@ -1,12 +1,11 @@
 import Link from "next/link";
 
 export const inputClass =
-  "h-12 w-full rounded-xl border border-line bg-obsidian-900 px-4 text-bone placeholder:text-dim transition-[border-color,box-shadow] duration-200 focus:border-mint focus:outline-none focus:ring-4 focus:ring-mint/15";
+  "input-cut h-12 w-full px-4 text-bone placeholder:text-dim transition-[border-color,box-shadow] duration-200";
 
-export const cardClass = "rounded-2xl border border-line bg-obsidian-900";
+export const cardClass = "cut";
 
-export const buttonClass =
-  "h-14 w-full rounded-full bg-mint font-display text-lg font-semibold text-obsidian-950 transition-transform active:scale-[0.98]";
+export const buttonClass = "btn-cut h-14 w-full text-lg";
 
 export function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
@@ -38,13 +37,13 @@ export function FormPage({
           Back
         </Link>
       )}
-      <h1 className="mt-2 font-display text-3xl font-semibold">{title}</h1>
+      <h1 className="mt-2 font-display text-3xl font-bold uppercase tracking-wide">{title}</h1>
       {error && (
-        <p role="alert" className="mt-4 rounded-xl border border-redline/50 px-4 py-3 text-sm text-redline">
+        <p role="alert" className="cut mt-4 px-4 py-3 text-sm text-redline [--panel:rgb(255_61_110/0.08)]">
           {error}
         </p>
       )}
-      {message && <p className="mt-4 rounded-xl border border-mint/40 px-4 py-3 text-sm text-mint">{message}</p>}
+      {message && <p className="cut mt-4 px-4 py-3 text-sm text-mint [--panel:rgb(200_255_46/0.06)]">{message}</p>}
       <div className="mt-6">{children}</div>
     </main>
   );

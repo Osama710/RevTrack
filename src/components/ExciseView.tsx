@@ -104,7 +104,7 @@ export default function ExciseView() {
 
       {snap && (
         <div className="mt-5 space-y-4">
-          <section className="rounded-2xl border border-line bg-obsidian-900 p-4">
+          <section className="cut p-4">
             <h2 className="font-display text-lg font-semibold">Driving licence</h2>
             {licences.length === 0 ? <p className="mt-1 text-sm text-dim">No licence saved. Add it in Garage, then Document wallet.</p> : licences.map((d) => (
               <div key={d.id} className="mt-2">
@@ -118,7 +118,7 @@ export default function ExciseView() {
           {snap.vehicles.map((v) => {
             const vd = docs.filter((d) => d.vehicle_id === v.id && d.doc_type !== "token_tax" && d.doc_type !== "driving_license");
             return (
-              <section key={v.id} className="rounded-2xl border border-line bg-obsidian-900 p-4">
+              <section key={v.id} className="cut p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="font-display text-3xl font-bold tracking-wide">{v.plate ?? v.name}</p>
@@ -144,7 +144,7 @@ export default function ExciseView() {
             );
           })}
 
-          <section className="rounded-2xl border border-line bg-obsidian-900 p-4">
+          <section className="cut p-4">
             <h2 className="font-display text-lg font-semibold">Token tax history</h2>
             {tokens.length === 0 ? <p className="mt-1 text-sm text-dim">No token tax papers saved.</p> : (
               <ul className="mt-2 divide-y divide-line">

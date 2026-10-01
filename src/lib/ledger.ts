@@ -3,8 +3,8 @@ import type { FuelEntry, LogEntry } from "@/types/db";
 export type Category = "maintenance" | "tuning" | "parts" | "fuel";
 
 export const CATEGORY_META: Record<Category, { label: string; color: string }> = {
-  maintenance: { label: "Maintenance", color: "#00f5a0" },
-  tuning: { label: "Tuning", color: "#ff3366" },
+  maintenance: { label: "Maintenance", color: "#c8ff2e" },
+  tuning: { label: "Tuning", color: "#ff3d6e" },
   parts: { label: "Parts & DIY", color: "#7dd3fc" },
   fuel: { label: "Fuel", color: "#fbbf24" },
 };

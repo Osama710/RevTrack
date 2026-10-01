@@ -27,7 +27,7 @@ export default function Gauge({ label, value, caption, invert = false, delay = 0
 
   const pct = value === null ? 0 : Math.max(0, Math.min(100, Math.round(value)));
   const bad = value !== null && (invert ? pct >= 80 : pct <= 20);
-  const stroke = bad ? "#ff3366" : "#00f5a0";
+  const stroke = bad ? "#ff3d6e" : "#c8ff2e";
   const target = ARC * (1 - pct / 100);
 
   useGSAP(
