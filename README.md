@@ -1,45 +1,37 @@
 # RevTrack
 
-Mobile-first PWA for tracking car and bike maintenance. Next.js 15 (App Router), Supabase (Auth + Postgres with RLS), Tailwind v4, GSAP.
+Mobile-first PWA for tracking car and bike maintenance, spending, fuel, papers and reminders. Next.js 15, Supabase (Auth, Postgres with RLS, private Storage), Tailwind v4, GSAP, Framer Motion.
 
 ## Deploy without running anything locally
 
-### 1. GitHub
-1. Create an empty repo on github.com (no README, no .gitignore).
-2. Unzip this project on your computer.
-3. On the repo page choose **uploading an existing file** and drag in **the contents** of the unzipped folder (`src`, `public`, `supabase`, `package.json`, `.gitignore`, and the rest). Do not drag the outer folder itself.
-4. Commit to `main`.
+1. **Supabase SQL Editor**: run these files in order (each once)
+   `supabase/migrations/0001_init.sql`, `0002_profiles.sql`, `0003_odometer.sql`, `0004_garage_suite.sql`
+   (skip any you already ran).
+2. **GitHub**: unzip, then drag the contents of the `revtrack` folder into the repo (Add file > Upload files) and commit to `main`. Existing files are overwritten.
+3. **Vercel environment variables** (Project Settings > Environment Variables), then redeploy:
 
-### 2. Supabase
-1. Create a project at supabase.com.
-2. **SQL Editor**: paste all of `supabase/migrations/0001_init.sql` and run it.
-3. **Project Settings > API**: copy the Project URL and the `anon` public key.
-4. **Authentication > Providers > Email**: while testing, turn **Confirm email** off so signup logs you in immediately. Turn it back on once the site URL below is set.
+| Name | Where it comes from |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase > Project Settings > API |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | same page, `anon` key |
+| `SUPABASE_SERVICE_ROLE_KEY` | same page, `service_role` key. Server only, never share it |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | push keys; subject like `mailto:you@example.com` |
+| `CRON_SECRET` | any long random string |
+| `GEMINI_API_KEY` | free key from https://aistudio.google.com/apikey |
+| `GEMINI_MODEL` | optional, default `gemini-2.5-flash` |
 
-### 3. Vercel
-1. Import the GitHub repo (framework is detected as Next.js).
-2. Add two environment variables:
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-3. Deploy.
+4. **Supabase > Authentication > URL Configuration**: Site URL = your Vercel URL, and add `https://your-app.vercel.app/**` to Redirect URLs.
+5. **Phone**: open the site in Chrome, menu > Install app, then Alerts tab > Turn on notifications.
 
-### 4. Tell Supabase your live URL
-**Authentication > URL Configuration**
-- Site URL: your Vercel URL, like `https://revtrack.vercel.app`
-- Redirect URLs: add `https://revtrack.vercel.app/**`
-
-Never put the `service_role` key anywhere in this project. The anon key is safe because Row Level Security restricts every row to its owner.
-
-### 5. Install on your phone
-Open the Vercel URL in Chrome on Android, then menu > **Install app**.
-
-## Layout
+## Where things are
 ```
-public/            manifest, service worker, offline page, icons
-supabase/          SQL migration (tables, RLS, complete_task function)
-src/middleware.ts  session refresh and route gate
-src/app/(auth)/    login, signup, auth server actions
-src/app/(app)/     dashboard, vehicles/new, logs/new, tasks/new, settings
-src/components/    DashboardClient (tabs, predictions, checklist, GSAP)
-src/lib/           Supabase clients, prediction maths, form validation
+public/                 manifest, service worker (cache + push), offline page, icons
+supabase/migrations/    SQL: tables, RLS on every table, private storage bucket
+vercel.json             daily reminder cron (04:00 UTC, 09:00 Karachi)
+src/middleware.ts       session refresh and route gate
+src/app/(app)/          dashboard, ledger, garage, notifications, ustad, forms, settings
+src/app/excise/         Excise Safe Mode (offline-capable shell)
+src/app/api/            documents image, excise snapshot, push, cron, ustad
+src/components/         Dashboard, FinancialLedger, Gauge, nav, forms, SosShare, ExciseView
+src/lib/                predictions, ledger maths, alerts, push, AI, offline store
 ```
