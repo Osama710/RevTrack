@@ -3,6 +3,8 @@ import Link from "next/link";
 export const inputClass =
   "h-12 w-full rounded-xl border border-line bg-obsidian-900 px-4 text-bone placeholder:text-dim transition-[border-color,box-shadow] duration-200 focus:border-mint focus:outline-none focus:ring-4 focus:ring-mint/15";
 
+export const cardClass = "rounded-2xl border border-line bg-obsidian-900";
+
 export const buttonClass =
   "h-14 w-full rounded-full bg-mint font-display text-lg font-semibold text-obsidian-950 transition-transform active:scale-[0.98]";
 

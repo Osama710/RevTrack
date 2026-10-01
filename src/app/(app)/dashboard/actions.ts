@@ -40,6 +40,6 @@ export async function completeTask(input: {
     return { ok: false, error: error?.code === "P0002" ? "That task is already done." : "Couldn't save. Try again." };
   }
 
-  revalidatePath("/dashboard");
+  revalidatePath("/", "layout");
   return { ok: true, log: data as LogEntry };
 }

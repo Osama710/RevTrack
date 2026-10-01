@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
+export const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** Reads and validates FormData. On bad input it redirects back to `back` with ?error=... */
 export function reader(fd: FormData, back: string) {
@@ -41,6 +42,17 @@ export function reader(fd: FormData, back: string) {
     if (!DATE.test(v) || Number.isNaN(Date.parse(v))) return fail(`${label} needs a valid date.`);
     return v;
   }
+  function decimal(key: string, label: string, min = 0, max = 1e9): number {
+    const n = Number(raw(key));
+    if (!raw(key) || !Number.isFinite(n) || n < min || n > max) return fail(`${label} must be a number from ${min} to ${max}.`);
+    return Math.round(n * 100) / 100;
+  }
+  function bool(key: string): boolean {
+    return fd.get(key) === "on";
+  }
+  function optUuid(key: string, label: string): string | null {
+    return raw(key) ? uuid(key, label) : null;
+  }
   function optDate(key: string, label: string): string | null {
     return raw(key) ? date(key, label) : null;
   }
@@ -51,9 +63,9 @@ export function reader(fd: FormData, back: string) {
   }
   function uuid(key: string, label: string): string {
     const v = raw(key);
-    if (!/^[0-9a-f-]{36}$/i.test(v)) return fail(`Choose a valid ${label}.`);
+    if (!UUID_RE.test(v)) return fail(`Choose a valid ${label}.`);
     return v;
   }
 
-  return { fail, text, optText, int, optInt, money, date, optDate, pick, uuid };
+  return { fail, text, optText, int, optInt, money, decimal, bool, date, optDate, pick, uuid, optUuid };
 }

@@ -3,8 +3,13 @@ import { NextResponse, type NextRequest } from "next/server";
 
 type CookieToSet = { name: string; value: string; options: CookieOptions };
 
-/** Refreshes the auth cookie and gates every route except login, signup and the auth callback. */
+/** Refreshes the auth cookie and gates every route except login, signup, the auth callback and the cron endpoint. */
 export async function updateSession(request: NextRequest) {
+  const path = request.nextUrl.pathname;
+
+  // The cron endpoint has no user session. It authenticates itself with CRON_SECRET.
+  if (path.startsWith("/api/cron")) return NextResponse.next({ request });
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -27,11 +32,11 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const path = request.nextUrl.pathname;
   const isAuthPage = path === "/login" || path === "/signup";
   const isPublic = isAuthPage || path.startsWith("/auth");
 
   if (!user && !isPublic) {
+    if (path.startsWith("/api/")) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.search = "";
