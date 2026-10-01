@@ -5,8 +5,10 @@ export const CURRENCIES = ["Rs", "$", "€", "£", "AED", "SAR"] as const;
 type Client = Awaited<ReturnType<typeof createClient>>;
 
 /** Never throws: before the profiles migration is run, or if the row is missing, sensible defaults apply. */
-export async function getProfile(supabase: Client) {
-  const { data } = await supabase.from("profiles").select("display_name, currency").maybeSingle();
+export async function getProfile(supabase: Client, userId?: string) {
+  let q = supabase.from("profiles").select("display_name, currency");
+  if (userId) q = q.eq("id", userId);
+  const { data } = await q.maybeSingle();
   return {
     displayName: (data?.display_name ?? null) as string | null,
     currency: (data?.currency ?? "Rs") as string,

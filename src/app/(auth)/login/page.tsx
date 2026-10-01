@@ -1,24 +1,46 @@
-import Link from "next/link";
+import AuthShell, { AuthSwitchLink } from "@/components/auth/AuthShell";
 import { signIn } from "../actions";
-import { Field, FormPage, buttonClass, inputClass } from "@/components/ui/form";
+import { Field, buttonClass, inputClass } from "@/components/ui/form";
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string; message?: string }> }) {
   const sp = await searchParams;
   return (
-    <FormPage title="Sign in to RevTrack" back={null} error={sp.error} message={sp.message}>
+    <AuthShell
+      mode="login"
+      title="Sign in"
+      subtitle="Track fuel, fixes, and papers for every car and bike you ride."
+      error={sp.error}
+      message={sp.message}
+      footer={
+        <>
+          New here? <AuthSwitchLink href="/signup">Create an account</AuthSwitchLink>
+        </>
+      }
+    >
       <form action={signIn} className="space-y-5">
         <Field label="Email">
-          <input name="email" type="email" required autoComplete="email" inputMode="email" className={inputClass} />
+          <input
+            name="email"
+            type="email"
+            required
+            autoComplete="email"
+            inputMode="email"
+            placeholder="you@example.com"
+            className={inputClass}
+          />
         </Field>
         <Field label="Password">
-          <input name="password" type="password" required autoComplete="current-password" className={inputClass} />
+          <input
+            name="password"
+            type="password"
+            required
+            autoComplete="current-password"
+            placeholder="••••••••"
+            className={inputClass}
+          />
         </Field>
-        <button type="submit" className={buttonClass}>Sign in</button>
+        <button type="submit" className={buttonClass}>Enter RevTrack</button>
       </form>
-      <p className="mt-6 text-center text-sm text-dim">
-        New here?{" "}
-        <Link href="/signup" className="font-semibold text-mint">Create an account</Link>
-      </p>
-    </FormPage>
+    </AuthShell>
   );
 }

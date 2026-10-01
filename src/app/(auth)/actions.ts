@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -16,6 +17,12 @@ export async function signIn(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) go("/login", "error", "Wrong email or password.");
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) go("/login", "error", "Sign-in did not complete. Try again.");
+
+  revalidatePath("/", "layout");
   redirect("/dashboard");
 }
 
@@ -36,8 +43,10 @@ export async function signUp(formData: FormData) {
   });
   if (error) go("/signup", "error", error.message);
 
-  // With "Confirm email" turned off in Supabase, the user is signed in immediately.
-  if (data.session) redirect("/dashboard");
+  if (data.session) {
+    revalidatePath("/", "layout");
+    redirect("/dashboard");
+  }
   go("/login", "message", "Check your email to confirm your account, then sign in.");
 }
 
