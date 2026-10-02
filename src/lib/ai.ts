@@ -13,12 +13,33 @@ Kabhi pakka diagnosis ka daawa na karein.`;
 
 export class AiUnavailable extends Error {}
 
-const DEFAULT_MODELS = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-flash-8b"];
+const DEFAULT_MODELS = ["gemini-2.0-flash", "gemini-2.5-flash", "gemini-1.5-flash", "gemini-1.5-flash-8b"];
 
 function modelsToTry(): string[] {
   const preferred = process.env.GEMINI_MODEL?.trim();
   const list = preferred ? [preferred, ...DEFAULT_MODELS] : DEFAULT_MODELS;
-  return [...new Set(list)];
+  return [...new Set(list.filter(Boolean))];
+}
+
+/** Gemini expects alternating user/model turns; bad rows break the whole request. */
+function normalizeHistory(history: ChatTurn[]): ChatTurn[] {
+  const out: ChatTurn[] = [];
+  for (const turn of history) {
+    const content = turn.content.trim();
+    if (!content) continue;
+    if (out.length === 0 && turn.role !== "user") continue;
+    const last = out[out.length - 1];
+    if (last?.role === turn.role) {
+      out[out.length - 1] = { role: turn.role, content: `${last.content}\n${content}` };
+    } else {
+      out.push({ role: turn.role, content });
+    }
+  }
+  return out.slice(-10);
+}
+
+function retryableStatus(status: number): boolean {
+  return status === 400 || status === 404 || status === 500 || status === 502 || status === 503;
 }
 
 async function callGemini(model: string, system: string, history: ChatTurn[], message: string, key: string) {
@@ -50,14 +71,15 @@ function extractText(data: unknown): string {
 
 export async function askUstad(opts: { history: ChatTurn[]; message: string; vehicleContext?: string }): Promise<string> {
   const key = process.env.GEMINI_API_KEY?.trim();
-  if (!key) throw new AiUnavailable("AI Ustad is not configured. Add GEMINI_API_KEY to your environment.");
+  if (!key) throw new AiUnavailable("AI Ustad is not configured. Add GEMINI_API_KEY on Vercel (Production), then redeploy.");
 
+  const history = normalizeHistory(opts.history);
   const system = opts.vehicleContext ? `${SYSTEM}\n\nGaari ki maloomat:\n${opts.vehicleContext}` : SYSTEM;
   let lastStatus = 0;
   let lastHint = "";
 
   for (const model of modelsToTry()) {
-    const res = await callGemini(model, system, opts.history, opts.message, key);
+    const res = await callGemini(model, system, history, opts.message, key);
     lastStatus = res.status;
 
     if (res.status === 429) throw new AiUnavailable("Free AI limit reached. Try again in a minute.");
@@ -75,7 +97,8 @@ export async function askUstad(opts: { history: ChatTurn[]; message: string; veh
       lastHint = res.statusText;
     }
 
-    if (res.status === 404 || res.status === 400) continue;
+    if (res.status === 401 || res.status === 403) break;
+    if (retryableStatus(res.status)) continue;
     break;
   }
 

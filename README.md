@@ -53,7 +53,7 @@ Open [http://localhost:3000](http://localhost:3000).
 | `VAPID_SUBJECT` | e.g. `mailto:you@example.com` |
 | `CRON_SECRET` | Secret for `/api/cron/reminders` |
 | `GEMINI_API_KEY` | [Google AI Studio](https://aistudio.google.com/apikey) key for AI Ustad |
-| `GEMINI_MODEL` | Optional; default `gemini-2.5-flash` |
+| `GEMINI_MODEL` | Optional; tries `gemini-2.0-flash` and fallbacks if unset |
 
 ### Database
 

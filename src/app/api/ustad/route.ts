@@ -60,6 +60,8 @@ export async function POST(req: Request) {
     await supabase.from("ai_assistant_logs").insert({ vehicle_id: vehicleId, role: "assistant", content: reply.slice(0, 6000) });
     return Response.json({ reply });
   } catch (e) {
-    return err(e instanceof AiUnavailable ? e.message : "Ustad couldn't answer. Try again shortly.", e instanceof AiUnavailable ? 503 : 500);
+    const message = e instanceof AiUnavailable ? e.message : "Ustad couldn't answer. Try again shortly.";
+    console.error("[api/ustad]", message);
+    return err(message, e instanceof AiUnavailable ? 503 : 500);
   }
 }
