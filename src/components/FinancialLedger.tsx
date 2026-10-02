@@ -77,8 +77,8 @@ export default function FinancialLedger({ ledger, currency }: { ledger: Ledger; 
         {ledger.total <= 0 ? (
           <p className="mt-2 text-sm text-dim">Log a service, part or fuel fill and the breakdown appears here.</p>
         ) : (
-          <div className="mt-4 flex items-center gap-5">
-            <svg viewBox="0 0 100 100" className="size-32 shrink-0" role="img" aria-label="Spending split by category">
+          <div className="mt-4 flex min-w-0 items-center gap-3 sm:gap-5">
+            <svg viewBox="0 0 100 100" className="size-24 shrink-0 sm:size-32" role="img" aria-label="Spending split by category">
               <title>Spending split by category</title>
               <circle cx="50" cy="50" r={R} fill="none" stroke="#26262a" strokeWidth="14" />
               {segments.map(({ c, len, offset: off }) => (

@@ -23,7 +23,7 @@ export default function LedgerClient({ logs, fuel, readings, currency }: Props) 
   const { vehicle, kind } = useGarage();
 
   return (
-    <main className="relative mx-auto max-w-md px-5 pb-56">
+    <main className="page-main relative">
       <PageTop />
       {vehicle ? (
         <KindStage stageKey={`${kind}:${vehicle.id}`}>

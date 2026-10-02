@@ -60,7 +60,7 @@ export default function DashboardClient(props: Props) {
   };
 
   return (
-    <main className="relative mx-auto max-w-md px-4 pb-44">
+    <main className="page-main relative">
       <PageTop />
       {vehicle ? (
         <KindStage stageKey={`${kind}:${vehicle.id}`}>
@@ -415,7 +415,7 @@ function DashboardBody({ vehicle, logs, fuel, readings, tasks, currency, license
       </section>
 
       {error && (
-        <p role="alert" className="fixed inset-x-5 bottom-[calc(env(safe-area-inset-bottom)+150px)] z-50 mx-auto max-w-md rounded-2xl border border-redline/50 bg-obsidian-900 px-4 py-3 text-sm text-redline">
+        <p role="alert" className="fixed inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+5.5rem)] z-50 mx-auto max-w-[calc(28rem-2rem)] cut px-3 py-2 text-xs text-redline [--panel:rgb(255_61_110/0.1)]">
           {error}
         </p>
       )}

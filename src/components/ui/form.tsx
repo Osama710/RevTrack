@@ -32,7 +32,7 @@ export function FormPage({
   children: React.ReactNode;
 }) {
   return (
-    <main className="mx-auto min-h-dvh max-w-md px-4 pb-[calc(env(safe-area-inset-bottom)+24px)] pt-[calc(env(safe-area-inset-top)+12px)]">
+    <main className="page-main mx-auto min-h-dvh min-w-0 overflow-x-hidden pt-[calc(env(safe-area-inset-top)+12px)]">
       <div className="flex items-center gap-2">
         {back && <BackLink href={back} />}
         <h1 className="font-display text-lg font-bold uppercase tracking-wide">{title}</h1>

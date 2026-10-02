@@ -20,8 +20,10 @@ export default function AppShell({
       <GarageProvider vehicles={vehicles}>
         <div aria-hidden className="aurora noise" />
         <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 bg-grid opacity-50" />
-        {children}
-        <BottomDock />
+        <div className="app-viewport min-w-0 overflow-x-hidden">
+          {children}
+          <BottomDock />
+        </div>
       </GarageProvider>
     </ProfileProvider>
   );

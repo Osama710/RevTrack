@@ -7,7 +7,7 @@ import type { Alert } from "@/lib/alerts";
 
 export default function NotificationsClient({ alerts, publicKey }: { alerts: Alert[]; publicKey: string }) {
   return (
-    <main className="relative mx-auto max-w-md px-5 pb-56">
+    <main className="page-main relative">
       <PageTop />
       <h1 className="h-sec mt-2">Alerts</h1>
       <p className="mb-5 text-sm text-dim">Everything that needs your attention.</p>

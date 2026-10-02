@@ -21,8 +21,8 @@ export function PageTop() {
   const initial = (name?.trim()[0] ?? "R").toUpperCase();
 
   return (
-    <header className="sticky top-0 z-30 -mx-4 border-b border-line/60 bg-obsidian-950/80 px-4 pb-2.5 pt-[calc(env(safe-area-inset-top)+8px)] backdrop-blur-lg">
-      <div className="flex items-center gap-2.5">
+    <header className="sticky top-0 z-30 -mx-4 min-w-0 max-w-[calc(100%+2rem)] overflow-x-clip border-b border-line/60 bg-obsidian-950/80 px-4 pb-2.5 pt-[calc(env(safe-area-inset-top)+8px)] backdrop-blur-lg">
+      <div className="flex min-w-0 items-center gap-2.5">
         <AppLink href="/settings" aria-label="Your profile" className="cut cut-sm cut-hot grid size-9 shrink-0 place-items-center">
           <span className="relative grid size-[calc(100%-2px)] place-items-center bg-obsidian-900 font-display text-sm font-bold text-grad [clip-path:polygon(0_0,calc(100%-6px)_0,100%_6px,100%_100%,6px_100%,0_calc(100%-6px))]">
             {initial}
@@ -37,7 +37,7 @@ export function PageTop() {
         </AppLink>
       </div>
 
-      <div className="mt-2 flex items-center gap-1.5">
+      <div className="mt-2 flex w-full max-w-full min-w-0 items-center gap-1.5">
         <div role="tablist" aria-label="Vehicle type" className="cut cut-sm flex shrink-0 p-0.5">
           {KINDS.map(({ key, label, Icon }) => {
             const active = kind === key;
@@ -64,7 +64,7 @@ export function PageTop() {
           })}
         </div>
 
-        <div className="-mr-5 flex min-w-0 flex-1 gap-2 overflow-x-auto pr-5 [scrollbar-width:none]">
+        <div className="flex min-w-0 flex-1 gap-1.5 overflow-x-auto overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {kindVehicles.map((v) => {
             const on = v.id === vehicle?.id;
             return (
@@ -110,37 +110,42 @@ export function BottomDock() {
   const tab = ({ href, label, Icon }: (typeof LEFT)[number]) => {
     const active = path === href;
     return (
-      <li key={href}>
+      <li key={href} className="min-w-0 overflow-hidden">
         <AppLink
           href={href}
           aria-current={active ? "page" : undefined}
-          className={`relative flex min-h-12 flex-col items-center justify-center gap-0.5 text-[10px] font-semibold uppercase tracking-wider transition-colors active:scale-95 ${active ? "text-mint" : "text-dim"}`}
+          className={`relative flex min-h-11 min-w-0 w-full flex-col items-center justify-center gap-0.5 px-0.5 text-[9px] font-semibold uppercase tracking-wide transition-colors active:scale-95 ${active ? "text-mint" : "text-dim"}`}
         >
           {active && (
-            <motion.span layoutId="dock-active" className="absolute inset-x-3 top-0 h-0.5 bg-mint shadow-[0_0_14px_2px_#c8ff2e]" transition={{ type: "spring", stiffness: 500, damping: 36 }} />
+            <motion.span layoutId="dock-active" className="absolute inset-x-1 top-0 h-0.5 bg-mint" transition={{ type: "spring", stiffness: 500, damping: 36 }} />
           )}
-          <Icon className="size-5" />
-          {label}
+          <Icon className="size-[1.15rem] shrink-0" />
+          <span className="w-full truncate text-center">{label}</span>
         </AppLink>
       </li>
     );
   };
 
   return (
-    <nav aria-label="Main" className="fixed inset-x-0 bottom-0 z-40 px-4 pb-[calc(env(safe-area-inset-bottom)+10px)]">
-      <ul className="cut mx-auto grid max-w-md grid-cols-5 items-center px-0.5 backdrop-blur-xl [--c:12px] [--panel:rgb(12_12_20/0.92)]">
+    <nav
+      aria-label="Main"
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-40 overflow-x-hidden pb-[calc(env(safe-area-inset-bottom)+8px)]"
+    >
+      <div className="dock-column pointer-events-auto mx-auto">
+        <ul className="cut grid w-full min-w-0 grid-cols-[repeat(5,minmax(0,1fr))] items-center overflow-hidden px-0.5 backdrop-blur-xl [--c:10px] [--panel:rgb(12_12_20/0.92)]">
         {LEFT.map(tab)}
-        <li className="grid place-items-center">
+        <li className="grid min-w-0 place-items-center overflow-hidden">
           <AppLink
             href="/logs/new"
             aria-label="Add an expense"
-            className="fab-pulse cut cut-lime relative grid size-10 place-items-center transition-transform active:scale-95"
+            className="fab-pulse cut cut-lime relative grid size-9 place-items-center transition-transform active:scale-95"
           >
             <IconPlus className="size-5" />
           </AppLink>
         </li>
         {RIGHT.map(tab)}
-      </ul>
+        </ul>
+      </div>
     </nav>
   );
 }

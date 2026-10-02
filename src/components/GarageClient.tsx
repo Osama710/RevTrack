@@ -20,7 +20,7 @@ export default function GarageClient({ docs }: { docs: DocumentRow[] }) {
   const shown = docs.filter((d) => d.vehicle_id === null || d.vehicle_id === vehicle?.id);
 
   return (
-    <main className="relative mx-auto max-w-md px-5 pb-56">
+    <main className="page-main relative">
       <PageTop />
       <KindStage stageKey={`${kind}:${vehicle?.id ?? "none"}`}>
         <GarageBody kind={kind} vehicles={kindVehicles} vehicle={vehicle} docs={shown} />

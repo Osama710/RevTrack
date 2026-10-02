@@ -47,7 +47,7 @@ export default function UstadChat({ initial, clearAction }: { initial: Msg[]; cl
   };
 
   return (
-    <div className="relative mx-auto flex h-dvh max-w-md flex-col">
+    <div className="app-viewport relative flex h-dvh min-w-0 flex-col overflow-x-hidden">
       {sending && <CarLoader fullscreen label="Ustad soch raha hai…" />}
       <header className="flex items-start justify-between gap-2 border-b border-line/60 px-4 pb-2 pt-[calc(env(safe-area-inset-top)+8px)]">
         <div className="flex items-center gap-1">

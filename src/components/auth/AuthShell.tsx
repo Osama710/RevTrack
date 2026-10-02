@@ -40,13 +40,13 @@ export default function AuthShell({
   );
 
   return (
-    <div ref={root} className="relative mx-auto flex min-h-dvh max-w-md flex-col px-5 pb-10 pt-[calc(env(safe-area-inset-top)+16px)]">
+    <div ref={root} className="app-viewport relative flex min-h-dvh min-w-0 flex-col overflow-x-hidden px-4 pb-10 pt-[calc(env(safe-area-inset-top)+16px)]">
       <div aria-hidden className="aurora noise pointer-events-none fixed inset-0 -z-10" />
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 bg-grid opacity-40" />
 
       <header data-auth-in className="mb-8">
         <p className="font-mono text-xs tracking-[0.35em] text-mint">REVTRACK</p>
-        <h1 className="mt-2 font-display text-4xl font-bold uppercase leading-[0.95] tracking-tight">
+        <h1 className="mt-2 break-words font-display text-3xl font-bold uppercase leading-[0.95] tracking-tight sm:text-4xl">
           Your garage,
           <span className="text-grad"> unlocked</span>
         </h1>
