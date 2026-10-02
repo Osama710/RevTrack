@@ -26,8 +26,12 @@ export async function POST(req: Request) {
 
   // Per-user hourly cap keeps the free AI quota from being burned by one account.
   const since = new Date(Date.now() - 3_600_000).toISOString();
-  const { count } = await supabase.from("ai_assistant_logs").select("id", { count: "exact", head: true }).eq("role", "user").gte("created_at", since);
-  if ((count ?? 0) >= HOURLY_LIMIT) return err("You've reached the hourly limit. Try again in a little while.", 429);
+  const { count, error: countErr } = await supabase
+    .from("ai_assistant_logs")
+    .select("id", { count: "exact", head: true })
+    .eq("role", "user")
+    .gte("created_at", since);
+  if (!countErr && (count ?? 0) >= HOURLY_LIMIT) return err("You've reached the hourly limit. Try again in a little while.", 429);
 
   let vehicleContext: string | undefined;
   if (vehicleId) {
@@ -41,7 +45,12 @@ export async function POST(req: Request) {
     }
   }
 
-  const { data: past } = await supabase.from("ai_assistant_logs").select("role, content").order("created_at", { ascending: false }).limit(10);
+  const { data: past } = await supabase
+    .from("ai_assistant_logs")
+    .select("role, content")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(10);
   const history = ((past ?? []) as ChatTurn[]).reverse();
 
   await supabase.from("ai_assistant_logs").insert({ vehicle_id: vehicleId, role: "user", content: message });

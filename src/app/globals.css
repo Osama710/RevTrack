@@ -77,7 +77,7 @@ a.cut:active, button.cut:active { transform: scale(.97); --panel: var(--color-ob
 .h-sec { font-family: var(--font-display); font-size: .8rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--color-bone); }
 .h-sec::before { content: "//"; color: var(--color-mint); margin-right: .5em; }
 .aurora { position: fixed; inset: 0; z-index: -10; pointer-events: none; overflow: hidden; }
-.aurora::before, .aurora::after { content: ""; position: absolute; width: 70vmax; height: 70vmax; border-radius: 50%; filter: blur(90px); opacity: .22; animation: drift 18s ease-in-out infinite alternate; }
+.aurora::before, .aurora::after { content: ""; position: absolute; width: 55vmax; height: 55vmax; border-radius: 50%; filter: blur(72px); opacity: .16; animation: drift 24s ease-in-out infinite alternate; }
 .aurora::before { background: var(--color-violet); top: -35vmax; right: -30vmax; }
 .aurora::after { background: var(--color-mint); bottom: -45vmax; left: -35vmax; opacity: .13; animation-delay: -9s; }
 @keyframes drift { to { transform: translate3d(-8vmax, 6vmax, 0) scale(1.15); } }
@@ -111,6 +111,11 @@ a.cut:active, button.cut:active { transform: scale(.97); --panel: var(--color-ob
   border: 1px solid var(--color-line);
   clip-path: polygon(0 0, calc(100% - var(--c)) 0, 100% var(--c), 100% 100%, var(--c) 100%, 0 calc(100% - var(--c)));
 }
+
+.loader-wheel { animation: wheel-spin 0.55s linear infinite; }
+.loader-dash { stroke-dasharray: 6 10; animation: dash-move 0.8s linear infinite; }
+@keyframes wheel-spin { to { transform: rotate(360deg); } }
+@keyframes dash-move { to { stroke-dashoffset: -32; } }
 
 .noise::after {
   content: ""; pointer-events: none; position: fixed; inset: 0; z-index: -9; opacity: .04;

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { logOdometer } from "../../../actions";
-import { Field, FormPage, buttonClass, inputClass } from "@/components/ui/form";
+import { Field, FormPage, SubmitButton, inputClass } from "@/components/ui/form";
 import { requireUser } from "@/lib/auth";
 import { UUID_RE } from "@/lib/form";
 import { km } from "@/lib/format";
@@ -32,7 +32,7 @@ export default async function OdometerPage({
         <Field label="Date">
           <input name="read_on" type="date" required defaultValue={new Date().toISOString().slice(0, 10)} className={inputClass} />
         </Field>
-        <button type="submit" className={buttonClass}>Save reading</button>
+        <SubmitButton>Save reading</SubmitButton>
       </form>
     </FormPage>
   );

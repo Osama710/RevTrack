@@ -2,7 +2,7 @@ import Link from "next/link";
 import { signOut } from "../../(auth)/actions";
 import { updatePassword, updateProfile } from "../actions";
 import SignOutForm from "@/components/SignOutForm";
-import { Field, FormPage, buttonClass, inputClass } from "@/components/ui/form";
+import { Field, FormPage, SubmitButton, inputClass } from "@/components/ui/form";
 import { requireUser } from "@/lib/auth";
 import { CURRENCIES, getProfile } from "@/lib/profile";
 
@@ -38,7 +38,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
               ))}
             </select>
           </Field>
-          <button type="submit" className={buttonClass}>Save profile</button>
+          <SubmitButton>Save profile</SubmitButton>
         </form>
       </section>
 

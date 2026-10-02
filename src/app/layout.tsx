@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Chakra_Petch, Manrope } from "next/font/google";
+import { NavigationProvider } from "@/components/navigation-loading";
 import RegisterSW from "@/components/pwa/RegisterSW";
 import "./globals.css";
 
@@ -25,7 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${chakra.variable} ${manrope.variable}`}>
       <body>
-        {children}
+        <NavigationProvider>{children}</NavigationProvider>
         <RegisterSW />
       </body>
     </html>

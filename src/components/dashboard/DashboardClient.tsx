@@ -60,7 +60,7 @@ export default function DashboardClient(props: Props) {
   };
 
   return (
-    <main className="relative mx-auto max-w-md px-5 pb-56">
+    <main className="relative mx-auto max-w-md px-4 pb-44">
       <PageTop />
       {vehicle ? (
         <KindStage stageKey={`${kind}:${vehicle.id}`}>
@@ -150,30 +150,19 @@ function DashboardBody({ vehicle, logs, fuel, readings, tasks, currency, license
 
   const { contextSafe } = useGSAP(
     () => {
-      const mm = gsap.matchMedia();
-      mm.add("(prefers-reduced-motion: no-preference)", () => {
-        gsap
-          .timeline({ defaults: { ease: "power3.out" } })
-          .from("[data-hero]", { autoAlpha: 0, y: 14, duration: 0.3, clearProps: "opacity,visibility,transform" })
-          .from("[data-stat]", { autoAlpha: 0, y: 18, scale: 0.96, duration: 0.35, stagger: 0.05, clearProps: "opacity,visibility,transform" }, "-=0.2")
-          .from("[data-reveal]", { autoAlpha: 0, y: 12, duration: 0.3, stagger: 0.04, clearProps: "opacity,visibility,transform" }, "-=0.2");
-
-        const el = odo.current;
-        if (el) {
-          const counter = { v: 0 };
-          gsap.to(counter, {
-            v: vehicle.current_mileage,
-            duration: 0.7,
-            ease: "power2.out",
-            onUpdate: () => {
-              el.textContent = km(counter.v);
-            },
-          });
-        }
+      const el = odo.current;
+      if (!el) return;
+      const counter = { v: vehicle.current_mileage };
+      gsap.fromTo(counter, { v: Math.max(0, vehicle.current_mileage - 120) }, {
+        v: vehicle.current_mileage,
+        duration: 0.45,
+        ease: "power2.out",
+        onUpdate: () => {
+          el.textContent = km(counter.v);
+        },
       });
-      return () => mm.revert();
     },
-    { scope: root }
+    { scope: root, dependencies: [vehicle.current_mileage] }
   );
 
   /* Ring fills, check draws, title gets struck through, then the row fades away and the list closes up. */
@@ -218,20 +207,19 @@ function DashboardBody({ vehicle, logs, fuel, readings, tasks, currency, license
   return (
     <div ref={root}>
       {/* Hero */}
-      <section data-hero className="cut cut-lg cut-hero relative mt-3 p-5">
-        <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 size-40 rounded-full bg-violet/30 blur-3xl" />
-        <Link href={`/vehicles/${id}`} className="inline-flex min-h-11 items-center gap-1">
-          <h1 className="font-display text-2xl font-bold uppercase tracking-wide">{vehicle.name}</h1>
-          <IconChevron className="size-5 text-mint" />
+      <section data-hero className="cut cut-hero relative mt-2 p-3.5 [--c:12px]">
+        <Link href={`/vehicles/${id}`} className="inline-flex items-center gap-1">
+          <h1 className="font-display text-lg font-bold uppercase tracking-wide">{vehicle.name}</h1>
+          <IconChevron className="size-4 text-mint" />
         </Link>
-        <p className="text-sm text-dim">{[vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ") || vehicle.plate || "Odometer"}</p>
-        <div className="mt-3 flex items-baseline gap-2">
-          <span key={`${id}-${vehicle.current_mileage}`} ref={odo} suppressHydrationWarning className="text-grad font-display text-6xl font-bold leading-none tabular-nums">
+        <p className="text-[11px] text-dim">{[vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ") || vehicle.plate || "Odometer"}</p>
+        <div className="mt-2 flex items-baseline gap-1.5">
+          <span key={`${id}-${vehicle.current_mileage}`} ref={odo} suppressHydrationWarning className="text-grad font-display text-4xl font-bold leading-none tabular-nums">
             {km(vehicle.current_mileage)}
           </span>
-          <span className="font-display text-lg text-dim">KM</span>
+          <span className="text-xs text-dim">km</span>
         </div>
-        <p className="mt-2 text-sm text-dim">
+        <p className="mt-1 text-[11px] text-dim">
           {kmPerDay === null ? "Update your odometer to see your pace." : `About ${Math.round(kmPerDay)} km a day lately`}
         </p>
       </section>

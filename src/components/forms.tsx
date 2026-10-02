@@ -1,4 +1,4 @@
-import { Field, buttonClass, inputClass } from "@/components/ui/form";
+import { Field, SubmitButton, inputClass } from "@/components/ui/form";
 import { FUEL_STATIONS, KARACHI_AREAS, SERVICE_TYPES } from "@/lib/service-types";
 import { CATEGORY_META } from "@/lib/ledger";
 import type { ExpenseType } from "@/types/db";
@@ -110,7 +110,7 @@ export function VehicleForm({
         </div>
       </details>
 
-      <button type="submit" className={buttonClass}>{submitLabel}</button>
+      <SubmitButton>{submitLabel}</SubmitButton>
     </form>
   );
 }
@@ -166,7 +166,7 @@ export function LogForm({
       </div>
       <Field label="Cost"><input name="cost" type="number" inputMode="decimal" min={0} step="0.01" defaultValue={defaults.cost} className={inputClass} /></Field>
       <Field label="Notes"><textarea name="notes" rows={3} maxLength={1000} defaultValue={defaults.notes ?? ""} className={`${inputClass} h-auto py-3`} /></Field>
-      <button type="submit" className={buttonClass}>{submitLabel}</button>
+      <SubmitButton>{submitLabel}</SubmitButton>
     </form>
   );
 }
@@ -222,7 +222,7 @@ export function FuelForm({
         </span>
       </label>
       <Field label="Notes"><textarea name="notes" rows={2} maxLength={500} defaultValue={defaults.notes ?? ""} className={`${inputClass} h-auto py-3`} /></Field>
-      <button type="submit" className={buttonClass}>{submitLabel}</button>
+      <SubmitButton>{submitLabel}</SubmitButton>
     </form>
   );
 }
@@ -271,7 +271,7 @@ export function TaskForm({
         <Field label="At odometer (km)"><input name="target_mileage" type="number" inputMode="numeric" min={0} defaultValue={defaults.target_mileage ?? ""} className={inputClass} /></Field>
       </div>
       <Field label="Notes"><textarea name="notes" rows={3} maxLength={1000} defaultValue={defaults.notes ?? ""} className={`${inputClass} h-auto py-3`} /></Field>
-      <button type="submit" className={buttonClass}>{submitLabel}</button>
+      <SubmitButton>{submitLabel}</SubmitButton>
     </form>
   );
 }

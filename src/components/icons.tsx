@@ -80,6 +80,11 @@ export const IconChevron = (p: P) => (
     <path d="M9 6l6 6-6 6" />
   </Icon>
 );
+export const IconChevronBack = (p: P) => (
+  <Icon {...p}>
+    <path d="M15 6l-6 6 6 6" />
+  </Icon>
+);
 export const IconUser = (p: P) => (
   <Icon {...p}>
     <circle cx="12" cy="8" r="4" />

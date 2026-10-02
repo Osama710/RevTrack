@@ -2,11 +2,14 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import CarLoader from "@/components/CarLoader";
 import { Field, buttonClass, inputClass } from "@/components/ui/form";
+import { useNavLoading } from "@/components/navigation-loading";
 import { createClient } from "@/lib/supabase/client";
 
 export default function SignInForm() {
   const router = useRouter();
+  const { start } = useNavLoading();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -14,6 +17,7 @@ export default function SignInForm() {
     e.preventDefault();
     setError(null);
     setPending(true);
+    start();
 
     const fd = new FormData(e.currentTarget);
     const email = String(fd.get("email") ?? "").trim();
@@ -67,7 +71,14 @@ export default function SignInForm() {
         />
       </Field>
       <button type="submit" disabled={pending} className={`${buttonClass} disabled:opacity-60`}>
-        {pending ? "Signing in…" : "Enter RevTrack"}
+        {pending ? (
+          <span className="flex items-center justify-center gap-2">
+            <CarLoader />
+            <span>Signing in…</span>
+          </span>
+        ) : (
+          "Enter RevTrack"
+        )}
       </button>
     </form>
   );
