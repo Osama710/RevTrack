@@ -16,6 +16,7 @@ import { KindStage, PageTop } from "@/components/nav";
 import { CATEGORY_META } from "@/lib/ledger";
 import { CHECKLISTS } from "@/lib/checklists";
 import { daysUntil } from "@/lib/docs";
+import { fuelKindLabel, fuelQuantityLabel } from "@/lib/fuel";
 import { km, money, shortDate } from "@/lib/format";
 import { worstOf, type Prediction } from "@/lib/predict";
 import { vehicleStats } from "@/lib/vehicle-stats";
@@ -135,11 +136,11 @@ function DashboardBody({ vehicle, logs, fuel, readings, tasks, currency, license
         href: `/logs/${l.id}/edit`,
         color: CATEGORY_META[l.expense_type].color,
       })),
-      ...stats.fuel.map((f) => ({
+      ...stats.fuel.map((f: FuelEntry) => ({
         id: `f${f.id}`,
         date: f.filled_on,
-        title: `Fuel at ${f.station}`,
-        sub: `${Number(f.liters).toFixed(1)} L · ${km(f.odometer)} km`,
+        title: `${fuelKindLabel(f.fuel_kind)} · ${f.station}`,
+        sub: `${fuelQuantityLabel(f)} · ${km(f.odometer)} km`,
         cost: Number(f.total_cost),
         href: `/fuel/${f.id}/edit`,
         color: CATEGORY_META.fuel.color,
@@ -308,8 +309,9 @@ function DashboardBody({ vehicle, logs, fuel, readings, tasks, currency, license
                 <div className="min-w-0">
                   <p className="font-semibold">{p.serviceType}</p>
                   <p className="text-xs text-dim">
-                    At {km(p.dueMileage)} km
-                    {p.etaDays !== null && p.status !== "overdue" ? ` · about ${p.etaDays} days at your pace` : ""}
+                    Every {km(p.intervalKm)} km · due at {km(p.dueMileage)}
+                    {p.etaDays !== null && p.status !== "overdue" ? ` · ~${p.etaDays}d at your pace` : ""}
+                    {p.basis === "history" ? " · from your logs" : ""}
                     {p.accelerated ? " · rough-road interval" : ""}
                   </p>
                 </div>

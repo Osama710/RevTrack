@@ -7,6 +7,7 @@ import FinancialLedger from "@/components/FinancialLedger";
 import { useGarage } from "@/components/garage-context";
 import { IconFuel, IconPlus } from "@/components/icons";
 import { KindStage, PageTop } from "@/components/nav";
+import { fuelKindLabel, fuelQuantityLabel } from "@/lib/fuel";
 import { km, money, shortDate } from "@/lib/format";
 import { CATEGORY_META } from "@/lib/ledger";
 import { vehicleStats } from "@/lib/vehicle-stats";
@@ -53,13 +54,13 @@ function LedgerBody({ vehicle, logs, fuel, readings, currency }: Props & { vehic
         cost: Number(l.cost),
         href: `/logs/${l.id}/edit`,
       })),
-      ...stats.fuel.map((f) => ({
+      ...stats.fuel.map((f: FuelEntry) => ({
         id: `f${f.id}`,
         date: f.filled_on,
-        title: `Fuel at ${f.station}`,
+        title: `${fuelKindLabel(f.fuel_kind)} · ${f.station}`,
         label: "Fuel",
         color: CATEGORY_META.fuel.color,
-        sub: `${Number(f.liters).toFixed(1)} L${f.area ? ` · ${f.area}` : ""}`,
+        sub: `${fuelQuantityLabel(f)}${f.area ? ` · ${f.area}` : ""}`,
         cost: Number(f.total_cost),
         href: `/fuel/${f.id}/edit`,
       })),

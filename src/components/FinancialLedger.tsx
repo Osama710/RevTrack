@@ -63,7 +63,11 @@ export default function FinancialLedger({ ledger, currency }: { ledger: Ledger; 
         <Stat label="Monthly average" value={money(ledger.avgMonthly, currency)} hint="All spending" />
         <Stat label="This month" value={money(ledger.thisMonth, currency)} />
         <Stat label="Cost per km" value={perKm === null ? "No data" : `${currency} ${perKm.toFixed(1)}`} hint="Running plus upkeep" />
-        <Stat label="Fuel economy" value={fuel.kmPerL === null ? "No data" : `${fuel.kmPerL.toFixed(1)} km/L`} hint="Fill to fill" />
+        <Stat
+          label="Petrol economy"
+          value={fuel.kmPerL === null ? "No data" : `${fuel.kmPerL.toFixed(1)} km/L`}
+          hint={fuel.kmPerKg !== null ? `LPG ${fuel.kmPerKg.toFixed(1)} km/kg` : "Petrol fill to fill"}
+        />
       </div>
 
       <div data-stat className={`${card} p-4`}>
@@ -184,26 +188,49 @@ export default function FinancialLedger({ ledger, currency }: { ledger: Ledger; 
       {/* Fuel run-rate */}
       <section data-stat className={`${card} p-4`}>
         <h2 className="font-display text-lg font-semibold">Fuel run-rate</h2>
-        {fuel.kmPerL === null ? (
-          <p className="mt-2 text-sm text-dim">Fill the tank and log it twice (with Full tank ticked) to measure km/L and cost per km.</p>
+        {fuel.kmPerL === null && fuel.kmPerKg === null ? (
+          <p className="mt-2 text-sm text-dim">Log two full petrol or LPG fills (same type) to measure economy and cost per km.</p>
         ) : (
-          <dl className="mt-3 grid grid-cols-3 gap-3 text-center">
-            <div>
-              <dt className="text-xs text-dim">Economy</dt>
-              <dd className="font-display text-xl font-bold tabular-nums">{fuel.kmPerL.toFixed(1)}</dd>
-              <dd className="text-xs text-dim">km/L</dd>
-            </div>
-            <div>
-              <dt className="text-xs text-dim">Fuel cost</dt>
-              <dd className="font-display text-xl font-bold tabular-nums">{fuel.costPerKm === null ? "-" : fuel.costPerKm.toFixed(1)}</dd>
-              <dd className="text-xs text-dim">{currency} per km</dd>
-            </div>
-            <div>
-              <dt className="text-xs text-dim">Measured</dt>
-              <dd className="font-display text-xl font-bold tabular-nums">{Math.round(fuel.totalKm).toLocaleString("en-US")}</dd>
-              <dd className="text-xs text-dim">km</dd>
-            </div>
-          </dl>
+          <div className="mt-3 space-y-4">
+            {fuel.kmPerL !== null && (
+              <dl className="grid grid-cols-3 gap-3 text-center">
+                <div>
+                  <dt className="text-xs text-dim">Petrol</dt>
+                  <dd className="font-display text-xl font-bold tabular-nums">{fuel.kmPerL.toFixed(1)}</dd>
+                  <dd className="text-xs text-dim">km/L</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-dim">Petrol cost</dt>
+                  <dd className="font-display text-xl font-bold tabular-nums">{fuel.costPerKmPetrol === null ? "-" : fuel.costPerKmPetrol.toFixed(1)}</dd>
+                  <dd className="text-xs text-dim">{currency}/km</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-dim">On petrol</dt>
+                  <dd className="font-display text-xl font-bold tabular-nums">{Math.round(fuel.totalKmPetrol).toLocaleString("en-US")}</dd>
+                  <dd className="text-xs text-dim">km</dd>
+                </div>
+              </dl>
+            )}
+            {fuel.kmPerKg !== null && (
+              <dl className="grid grid-cols-3 gap-3 text-center border-t border-line/60 pt-4">
+                <div>
+                  <dt className="text-xs text-dim">LPG</dt>
+                  <dd className="font-display text-xl font-bold tabular-nums">{fuel.kmPerKg.toFixed(1)}</dd>
+                  <dd className="text-xs text-dim">km/kg</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-dim">LPG cost</dt>
+                  <dd className="font-display text-xl font-bold tabular-nums">{fuel.costPerKmLpg === null ? "-" : fuel.costPerKmLpg.toFixed(1)}</dd>
+                  <dd className="text-xs text-dim">{currency}/km</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-dim">On LPG</dt>
+                  <dd className="font-display text-xl font-bold tabular-nums">{Math.round(fuel.totalKmLpg).toLocaleString("en-US")}</dd>
+                  <dd className="text-xs text-dim">km</dd>
+                </div>
+              </dl>
+            )}
+          </div>
         )}
       </section>
 

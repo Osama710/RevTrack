@@ -29,7 +29,7 @@ interface Interval {
 /** Used until a service type has two or more logs to learn from. Keys are lower-case. */
 const DEFAULTS: Record<VehicleKind, Record<string, Interval>> = {
   car: {
-    "oil change": { km: 5000, days: 180 },
+    "oil change": { km: 3000, days: 180 },
     "brake pads": { km: 30000, days: 730 },
     "tire rotation": { km: 10000, days: 180 },
     "air filter": { km: 15000, days: 365 },
@@ -40,7 +40,7 @@ const DEFAULTS: Record<VehicleKind, Record<string, Interval>> = {
     coolant: { km: 40000, days: 730 },
   },
   bike: {
-    "oil change": { km: 3000, days: 180 },
+    "oil change": { km: 1000, days: 180 },
     "chain service": { km: 1000, days: 60 },
     "brake pads": { km: 15000, days: 540 },
     "air filter": { km: 8000, days: 365 },
@@ -49,7 +49,7 @@ const DEFAULTS: Record<VehicleKind, Record<string, Interval>> = {
     battery: { km: 25000, days: 730 },
   },
 };
-const FALLBACK: Interval = { km: 5000, days: 180 };
+const FALLBACK: Interval = { km: 3000, days: 180 };
 
 /** Potholes, construction and speed breakers wear these faster, so their intervals are shortened. */
 const ROUGH_ROAD = new Set(["wheel alignment", "wheel balancing", "suspension check"]);

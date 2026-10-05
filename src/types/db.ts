@@ -1,4 +1,5 @@
 export type VehicleKind = "car" | "bike";
+export type FuelKind = "petrol" | "lpg";
 export type ExpenseType = "maintenance" | "tuning" | "parts";
 export type CplcStatus = "unverified" | "clear" | "stolen_reported";
 export type DocType = "driving_license" | "registration" | "token_tax" | "cplc" | "insurance" | "fitness" | "other";
@@ -35,7 +36,9 @@ export interface FuelEntry {
   vehicle_id: string;
   filled_on: string;
   odometer: number;
+  /** Petrol: litres. LPG: kilograms. */
   liters: number;
+  fuel_kind: FuelKind;
   total_cost: number;
   station: string;
   area: string | null;
@@ -76,6 +79,6 @@ export interface Reading {
 export const VEHICLE_COLS =
   "id, kind, name, make, model, year, current_mileage, plate, engine_no, chassis_no, color, cplc_status, cplc_checked_on";
 export const LOG_COLS = "id, vehicle_id, service_type, serviced_on, cost, mileage, notes, expense_type";
-export const FUEL_COLS = "id, vehicle_id, filled_on, odometer, liters, total_cost, station, area, full_tank, notes";
+export const FUEL_COLS = "id, vehicle_id, filled_on, odometer, liters, fuel_kind, total_cost, station, area, full_tank, notes";
 export const TASK_COLS = "id, vehicle_id, title, service_type, due_date, target_mileage, notes, checklist";
 export const DOC_COLS = "id, vehicle_id, doc_type, title, doc_number, issued_on, expires_on, image_path, notes";

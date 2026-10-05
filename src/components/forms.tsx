@@ -1,7 +1,8 @@
+import FuelKindFields from "@/components/FuelKindFields";
 import { Field, SubmitButton, inputClass } from "@/components/ui/form";
 import { FUEL_STATIONS, KARACHI_AREAS, SERVICE_TYPES } from "@/lib/service-types";
 import { CATEGORY_META } from "@/lib/ledger";
-import type { ExpenseType } from "@/types/db";
+import type { ExpenseType, FuelKind } from "@/types/db";
 
 type Action = (formData: FormData) => void | Promise<void>;
 type VehicleOption = { id: string; name: string; kind: string };
@@ -187,6 +188,7 @@ export function FuelForm({
     filled_on: string;
     odometer: number;
     liters?: number;
+    fuel_kind?: FuelKind;
     total_cost?: number;
     station?: string;
     area?: string | null;
@@ -194,33 +196,17 @@ export function FuelForm({
     notes?: string | null;
   };
 }) {
+  const kind = defaults.fuel_kind === "lpg" ? "lpg" : "petrol";
   return (
     <form action={action} className="space-y-5">
       <Hidden id={id} />
+      <datalist id="fuel-stations">{FUEL_STATIONS.map((s) => <option key={s} value={s} />)}</datalist>
       <VehicleSelect vehicles={vehicles} value={defaults.vehicle_id} />
       <div className="grid grid-cols-2 gap-3">
         <Field label="Date"><input name="filled_on" type="date" required defaultValue={defaults.filled_on} className={inputClass} /></Field>
         <Field label="Odometer (km)"><input name="odometer" type="number" inputMode="numeric" min={0} required defaultValue={defaults.odometer} className={inputClass} /></Field>
       </div>
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="Litres"><input name="liters" type="number" inputMode="decimal" min={0.1} max={500} step="0.01" required defaultValue={defaults.liters ?? ""} className={inputClass} /></Field>
-        <Field label="Total cost"><input name="total_cost" type="number" inputMode="decimal" min={0} step="0.01" required defaultValue={defaults.total_cost ?? ""} className={inputClass} /></Field>
-      </div>
-      <Field label="Petrol station" hint="Pick one or type your own.">
-        <input name="station" list="fuel-stations" required maxLength={40} defaultValue={defaults.station ?? ""} className={inputClass} />
-        <datalist id="fuel-stations">{FUEL_STATIONS.map((s) => <option key={s} value={s} />)}</datalist>
-      </Field>
-      <Field label="Area" hint="Helps compare petrol quality between parts of Karachi.">
-        <input name="area" list="karachi-areas" maxLength={60} defaultValue={defaults.area ?? ""} className={inputClass} />
-        <datalist id="karachi-areas">{KARACHI_AREAS.map((s) => <option key={s} value={s} />)}</datalist>
-      </Field>
-      <label className="flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border border-line px-4">
-        <input type="checkbox" name="full_tank" defaultChecked={defaults.full_tank ?? true} className="size-5 accent-[#c8ff2e]" />
-        <span>
-          <span className="block text-sm font-semibold">Filled to the brim</span>
-          <span className="block text-xs text-dim">Needed to measure km/L accurately.</span>
-        </span>
-      </label>
+      <FuelKindFields defaultKind={kind} defaults={defaults} />
       <Field label="Notes"><textarea name="notes" rows={2} maxLength={500} defaultValue={defaults.notes ?? ""} className={`${inputClass} h-auto py-3`} /></Field>
       <SubmitButton>{submitLabel}</SubmitButton>
     </form>

@@ -63,6 +63,7 @@ Run migrations in order in the **Supabase SQL Editor** (once per project):
 2. `supabase/migrations/0002_profiles.sql`
 3. `supabase/migrations/0003_odometer.sql`
 4. `supabase/migrations/0004_garage_suite.sql`
+5. `supabase/migrations/0005_fuel_kind.sql`
 
 In **Authentication → URL Configuration**, set **Site URL** to your app URL and add redirect URLs (e.g. `https://your-app.vercel.app/**` and `http://localhost:3000/**` for local auth).
 

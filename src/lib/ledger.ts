@@ -29,6 +29,7 @@ export interface StationStat {
 
 export interface FuelRow extends FuelEntry {
   kmPerL: number | null;
+  kmPerKg: number | null;
 }
 
 export interface Ledger {
@@ -37,7 +38,17 @@ export interface Ledger {
   avgMonthly: number;
   byCategory: Record<Category, number>;
   months: MonthBucket[];
-  fuel: { kmPerL: number | null; costPerKm: number | null; totalLiters: number; totalKm: number; rows: FuelRow[] };
+  fuel: {
+    kmPerL: number | null;
+    kmPerKg: number | null;
+    costPerKmPetrol: number | null;
+    costPerKmLpg: number | null;
+    totalLiters: number;
+    totalKg: number;
+    totalKmPetrol: number;
+    totalKmLpg: number;
+    rows: FuelRow[];
+  };
   stations: StationStat[];
   /** Everything spent divided by km driven, or null when km driven is unknown. */
   costPerKmOverall: number | null;
@@ -53,16 +64,30 @@ function monthLabel(key: string) {
   return new Date(y, m - 1, 1).toLocaleDateString("en-GB", { month: "short" });
 }
 
-/** Fuel economy is measured fill to fill: both fills full, distance since the last one over litres added. */
+function kindOf(f: FuelEntry): "petrol" | "lpg" {
+  return f.fuel_kind === "lpg" ? "lpg" : "petrol";
+}
+
+/** Economy is measured fill-to-fill within the same fuel type (petrol ≠ LPG). */
 export function fuelRows(fuel: FuelEntry[]): FuelRow[] {
   const sorted = [...fuel].sort((a, b) => a.odometer - b.odometer || a.filled_on.localeCompare(b.filled_on));
   return sorted.map((cur, i) => {
     const prev = sorted[i - 1];
     let kmPerL: number | null = null;
-    if (prev && prev.full_tank && cur.full_tank && cur.odometer > prev.odometer && cur.liters > 0) {
-      kmPerL = (cur.odometer - prev.odometer) / cur.liters;
+    let kmPerKg: number | null = null;
+    if (
+      prev &&
+      prev.full_tank &&
+      cur.full_tank &&
+      cur.odometer > prev.odometer &&
+      cur.liters > 0 &&
+      kindOf(prev) === kindOf(cur)
+    ) {
+      const dist = cur.odometer - prev.odometer;
+      if (kindOf(cur) === "petrol") kmPerL = dist / cur.liters;
+      else kmPerKg = dist / cur.liters;
     }
-    return { ...cur, kmPerL };
+    return { ...cur, fuel_kind: kindOf(cur), kmPerL, kmPerKg };
   });
 }
 
@@ -90,7 +115,6 @@ export function buildLedger(logs: LogEntry[], fuel: FuelEntry[], kmDriven: numbe
 
   const total = CATEGORIES.reduce((s, c) => s + byCategory[c], 0);
 
-  // Last six calendar months, oldest first, including empty ones so the chart keeps its shape.
   const recent: MonthBucket[] = [];
   for (let i = 5; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
@@ -106,23 +130,32 @@ export function buildLedger(logs: LogEntry[], fuel: FuelEntry[], kmDriven: numbe
     spanMonths = Math.max(1, (now.getFullYear() - fy) * 12 + (now.getMonth() + 1 - fm) + 1);
   }
 
-  // Fuel efficiency
   const rows = fuelRows(fuel);
-  let totalKm = 0;
+  let totalKmPetrol = 0;
   let totalLiters = 0;
-  let measuredCost = 0;
+  let measuredCostPetrol = 0;
+  let totalKmLpg = 0;
+  let totalKg = 0;
+  let measuredCostLpg = 0;
+
   for (const r of rows) {
-    if (r.kmPerL !== null) {
+    if (r.kmPerL !== null && kindOf(r) === "petrol") {
       const prevOdo = r.odometer - r.kmPerL * r.liters;
-      totalKm += r.odometer - prevOdo;
+      totalKmPetrol += r.odometer - prevOdo;
       totalLiters += r.liters;
-      measuredCost += Number(r.total_cost);
+      measuredCostPetrol += Number(r.total_cost);
+    }
+    if (r.kmPerKg !== null && kindOf(r) === "lpg") {
+      const prevOdo = r.odometer - r.kmPerKg * r.liters;
+      totalKmLpg += r.odometer - prevOdo;
+      totalKg += r.liters;
+      measuredCostLpg += Number(r.total_cost);
     }
   }
 
-  // Station quality: does one brand or area consistently give better mileage?
+  const petrolRows = rows.filter((r) => kindOf(r) === "petrol");
   const groups = new Map<string, FuelRow[]>();
-  for (const r of rows) {
+  for (const r of petrolRows) {
     const key = r.station.trim();
     const list = groups.get(key);
     if (list) list.push(r);
@@ -161,10 +194,14 @@ export function buildLedger(logs: LogEntry[], fuel: FuelEntry[], kmDriven: numbe
     byCategory,
     months: recent,
     fuel: {
-      kmPerL: totalLiters > 0 ? totalKm / totalLiters : null,
-      costPerKm: totalKm > 0 ? measuredCost / totalKm : null,
+      kmPerL: totalLiters > 0 ? totalKmPetrol / totalLiters : null,
+      kmPerKg: totalKg > 0 ? totalKmLpg / totalKg : null,
+      costPerKmPetrol: totalKmPetrol > 0 ? measuredCostPetrol / totalKmPetrol : null,
+      costPerKmLpg: totalKmLpg > 0 ? measuredCostLpg / totalKmLpg : null,
       totalLiters,
-      totalKm,
+      totalKg,
+      totalKmPetrol,
+      totalKmLpg,
       rows: rows.slice().reverse(),
     },
     stations,

@@ -20,7 +20,18 @@ export default async function EditFuelPage({ params, searchParams }: { params: P
 
   return (
     <FormPage title="Edit fuel entry" back="/ledger" error={sp.error}>
-      <FuelForm action={updateFuel} id={id} submitLabel="Save changes" vehicles={vehicles.data ?? []} defaults={{ ...f, liters: Number(f.liters), total_cost: Number(f.total_cost) }} />
+      <FuelForm
+        action={updateFuel}
+        id={id}
+        submitLabel="Save changes"
+        vehicles={vehicles.data ?? []}
+        defaults={{
+          ...f,
+          fuel_kind: f.fuel_kind === "lpg" ? "lpg" : "petrol",
+          liters: Number(f.liters),
+          total_cost: Number(f.total_cost),
+        }}
+      />
       <DeleteZone action={deleteFuel} id={id} label="fuel entry" warning="This changes your fuel economy figures. It can't be undone." />
     </FormPage>
   );

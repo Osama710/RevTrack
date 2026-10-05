@@ -167,13 +167,17 @@ export async function logOdometer(formData: FormData) {
 /* ───────── fuel ───────── */
 
 function readFuel(f: Reader) {
+  const fuel_kind = f.pick("fuel_kind", "fuel type", ["petrol", "lpg"] as const);
+  const maxQty = fuel_kind === "lpg" ? 50 : 500;
+  const qtyLabel = fuel_kind === "lpg" ? "Kilograms" : "Litres";
   return {
     vehicle_id: f.uuid("vehicle_id", "vehicle"),
     filled_on: f.date("filled_on", "Date"),
     odometer: f.int("odometer", "Odometer"),
-    liters: f.decimal("liters", "Litres", 0.1, 500),
+    fuel_kind,
+    liters: f.decimal("liters", qtyLabel, 0.1, maxQty),
     total_cost: f.decimal("total_cost", "Total cost"),
-    station: f.text("station", "Petrol station", 40),
+    station: f.text("station", fuel_kind === "lpg" ? "LPG dealer" : "Petrol station", 40),
     area: f.optText("area", "Area", 60),
     full_tank: f.bool("full_tank"),
     notes: f.optText("notes", "Notes", 500),
