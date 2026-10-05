@@ -161,6 +161,9 @@ a.cut:active, button.cut:active { transform: scale(.97); --panel: var(--color-ob
 
 .ustad-thread { scroll-behavior: smooth; }
 
+.ptr-spin.ptr-spin-on { animation: ptr-rotate 0.7s linear infinite; }
+@keyframes ptr-rotate { to { transform: rotate(360deg); } }
+
 .ustad-composer { --c: 12px; }
 .ustad-composer-input {
   max-height: 9rem;

@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { GarageProvider } from "@/components/garage-context";
 import { BottomDock } from "@/components/nav";
+import PullToRefresh from "@/components/PullToRefresh";
 import { ProfileProvider } from "@/components/profile-context";
 import type { Vehicle } from "@/types/db";
 
@@ -21,7 +22,7 @@ export default function AppShell({
         <div aria-hidden className="aurora noise" />
         <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 bg-grid opacity-50" />
         <div className="app-viewport min-w-0 overflow-x-hidden">
-          {children}
+          <PullToRefresh>{children}</PullToRefresh>
           <BottomDock />
         </div>
       </GarageProvider>
