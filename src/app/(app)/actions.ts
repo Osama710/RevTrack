@@ -297,7 +297,7 @@ export async function addChecklist(formData: FormData) {
 export async function clearUstadHistory() {
   const { supabase, user } = await requireUser();
   await supabase.from("ai_assistant_logs").delete().eq("user_id", user.id);
-  redirect("/ustad");
+  revalidatePath("/ustad");
 }
 
 /* ───────── tasks ───────── */

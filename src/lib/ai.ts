@@ -113,10 +113,10 @@ async function callGeminiWithRetries(
   key: string,
 ) {
   let last: Response | null = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
+  for (let attempt = 0; attempt < 2; attempt++) {
     last = await callGemini(model, system, history, message, key);
-    if (last.status === 503 && attempt < 2) {
-      await sleep(900 * (attempt + 1));
+    if (last.status === 503 && attempt < 1) {
+      await sleep(700);
       continue;
     }
     break;
