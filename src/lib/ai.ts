@@ -13,20 +13,31 @@ Kabhi pakka diagnosis ka daawa na karein.`;
 
 export class AiUnavailable extends Error {}
 
-/** Models that work with AI Studio keys on generateContent (2025+). */
-const DEFAULT_MODELS = [
-  "gemini-2.5-flash",
-  "gemini-2.0-flash",
-  "gemini-2.5-flash-lite",
-  "gemini-3.8-flash",
-];
+/** New AI Studio keys: use Gemini 3.x only (2.x is shut off for new users). */
+const DEFAULT_MODELS = ["gemini-3.5-flash-lite", "gemini-3.8-flash"];
 
-const DEPRECATED = new Set(["gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-1.5-pro"]);
+/** Map old env values to current model IDs. */
+const LEGACY_MODEL: Record<string, string> = {
+  "gemini-2.0-flash": "gemini-3.8-flash",
+  "gemini-2.5-flash": "gemini-3.8-flash",
+  "gemini-2.5-flash-lite": "gemini-3.5-flash-lite",
+  "gemini-1.5-flash": "gemini-3.5-flash-lite",
+  "gemini-1.5-flash-8b": "gemini-3.5-flash-lite",
+  "gemini-1.5-pro": "gemini-3.8-flash",
+};
+
+function resolveModel(name: string): string {
+  return LEGACY_MODEL[name] ?? name;
+}
 
 function modelsToTry(): string[] {
   const preferred = process.env.GEMINI_MODEL?.trim();
-  const list = preferred && !DEPRECATED.has(preferred) ? [preferred, ...DEFAULT_MODELS] : DEFAULT_MODELS;
+  const list = preferred ? [resolveModel(preferred), ...DEFAULT_MODELS] : DEFAULT_MODELS;
   return [...new Set(list.filter(Boolean))];
+}
+
+function sleep(ms: number) {
+  return new Promise((r) => setTimeout(r, ms));
 }
 
 /** Gemini expects alternating user/model turns; bad rows break the whole request. */
@@ -52,8 +63,7 @@ function retryableStatus(status: number): boolean {
 
 function generationConfig(model: string) {
   const base = { temperature: 0.45, maxOutputTokens: 900 };
-  // Fast chat: no extended "thinking" (can fail or slow on free tier).
-  if (/gemini-2\.5|gemini-3/i.test(model)) {
+  if (/gemini-3/i.test(model)) {
     return { ...base, thinkingConfig: { thinkingBudget: 0 } };
   }
   return base;
@@ -94,9 +104,36 @@ async function callGemini(model: string, system: string, history: ChatTurn[], me
   return callGeminiOnce("v1", model, system, history, message, key);
 }
 
+/** Up to 3 tries when Google returns temporary overload (503). */
+async function callGeminiWithRetries(
+  model: string,
+  system: string,
+  history: ChatTurn[],
+  message: string,
+  key: string,
+) {
+  let last: Response | null = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    last = await callGemini(model, system, history, message, key);
+    if (last.status === 503 && attempt < 2) {
+      await sleep(900 * (attempt + 1));
+      continue;
+    }
+    break;
+  }
+  return last!;
+}
+
 function extractText(data: unknown): string {
   const d = data as { candidates?: { content?: { parts?: { text?: string }[] } }[] };
   return d.candidates?.[0]?.content?.parts?.map((p) => p.text ?? "").join("").trim() ?? "";
+}
+
+function userFacingUnavailable(lastHint: string): string {
+  if (/high demand/i.test(lastHint) || /try again later/i.test(lastHint)) {
+    return "Google AI is busy right now. Wait a minute and try again.";
+  }
+  return lastHint ? `Ustad unavailable: ${lastHint}` : "Ustad couldn't answer. Try again shortly.";
 }
 
 export async function askUstad(opts: { history: ChatTurn[]; message: string; vehicleContext?: string }): Promise<string> {
@@ -110,7 +147,7 @@ export async function askUstad(opts: { history: ChatTurn[]; message: string; veh
   const tried: string[] = [];
 
   for (const model of modelsToTry()) {
-    const res = await callGemini(model, system, history, opts.message, key);
+    const res = await callGeminiWithRetries(model, system, history, opts.message, key);
     lastStatus = res.status;
 
     if (res.status === 429) throw new AiUnavailable("Free AI limit reached. Try again in a minute.");
@@ -142,7 +179,5 @@ export async function askUstad(opts: { history: ChatTurn[]; message: string; veh
   }
 
   console.error("[ai/ustad] all models failed:", tried.join(" | "));
-  throw new AiUnavailable(
-    lastHint ? `Ustad unavailable: ${lastHint}` : "Ustad couldn't answer. Try again shortly.",
-  );
+  throw new AiUnavailable(userFacingUnavailable(lastHint));
 }
