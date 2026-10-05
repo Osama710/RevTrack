@@ -5,6 +5,9 @@ export interface ChatTurn {
   content: string;
 }
 
+/** Shown in chat when the model chain fails — no vendor or stack details. */
+export const USTAD_OFFLINE_MSG = "Ustad is in the workshop, try again in a minute.";
+
 const SYSTEM = `Aap "AI Ustad" hain: Karachi ke mausam, traffic, tooti sadkon aur local petrol ki quality ko samajhne wala tajurbakar mechanic.
 Jawab Roman-Urdu mein dein. Agar user Urdu script ya English mein likhe to usi zubaan mein jawab dein.
 Jawab chhota aur amli rakhein: pehle sabse mumkin wajah, phir 3 se 5 aasan checks jo user khud kar sakta hai, phir batayein ke mechanic ko kab dikhana zaroori hai.
@@ -13,17 +16,16 @@ Kabhi pakka diagnosis ka daawa na karein.`;
 
 export class AiUnavailable extends Error {}
 
-/** New AI Studio keys: Gemini 3.x only. Lite first — less likely to hit “high demand” on 3.8. */
-const DEFAULT_MODELS = ["gemini-3.5-flash-lite", "gemini-3.8-flash"];
+const MODEL_CHAIN = ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-3.5-flash"];
 
-/** Map old env values to current model IDs. */
 const LEGACY_MODEL: Record<string, string> = {
-  "gemini-2.0-flash": "gemini-3.8-flash",
-  "gemini-2.5-flash": "gemini-3.8-flash",
+  "gemini-2.0-flash": "gemini-3.5-flash",
+  "gemini-2.5-flash": "gemini-3.5-flash",
   "gemini-2.5-flash-lite": "gemini-3.5-flash-lite",
+  "gemini-3.8-flash": "gemini-3.5-flash",
   "gemini-1.5-flash": "gemini-3.5-flash-lite",
   "gemini-1.5-flash-8b": "gemini-3.5-flash-lite",
-  "gemini-1.5-pro": "gemini-3.8-flash",
+  "gemini-1.5-pro": "gemini-3.5-flash",
 };
 
 function resolveModel(name: string): string {
@@ -32,7 +34,7 @@ function resolveModel(name: string): string {
 
 function modelsToTry(): string[] {
   const preferred = process.env.GEMINI_MODEL?.trim();
-  const list = preferred ? [resolveModel(preferred), ...DEFAULT_MODELS] : DEFAULT_MODELS;
+  const list = preferred ? [resolveModel(preferred), ...MODEL_CHAIN] : MODEL_CHAIN;
   return [...new Set(list.filter(Boolean))];
 }
 
@@ -40,7 +42,6 @@ function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-/** Gemini expects alternating user/model turns; bad rows break the whole request. */
 function normalizeHistory(history: ChatTurn[]): ChatTurn[] {
   const out: ChatTurn[] = [];
   for (const turn of history) {
@@ -55,10 +56,6 @@ function normalizeHistory(history: ChatTurn[]): ChatTurn[] {
     }
   }
   return out.slice(-10);
-}
-
-function retryableStatus(status: number): boolean {
-  return status === 400 || status === 404 || status === 500 || status === 502 || status === 503;
 }
 
 function generationConfig(model: string) {
@@ -104,25 +101,20 @@ async function callGemini(model: string, system: string, history: ChatTurn[], me
   return callGeminiOnce("v1", model, system, history, message, key);
 }
 
-/** Up to 3 tries when Google returns temporary overload (503). */
-async function callGeminiWithRetries(
+/** One retry after ~1s on 503 or 429, then move to the next model. */
+async function callModelWithBackoff(
   model: string,
   system: string,
   history: ChatTurn[],
   message: string,
   key: string,
 ) {
-  let last: Response | null = null;
-  const attempts = model.includes("flash-lite") ? 3 : 2;
-  for (let attempt = 0; attempt < attempts; attempt++) {
-    last = await callGemini(model, system, history, message, key);
-    if (last.status === 503 && attempt < attempts - 1) {
-      await sleep(600 * (attempt + 1));
-      continue;
-    }
-    break;
+  let res = await callGemini(model, system, history, message, key);
+  if (res.status === 503 || res.status === 429) {
+    await sleep(1000);
+    res = await callGemini(model, system, history, message, key);
   }
-  return last!;
+  return res;
 }
 
 function extractText(data: unknown): string {
@@ -130,33 +122,28 @@ function extractText(data: unknown): string {
   return d.candidates?.[0]?.content?.parts?.map((p) => p.text ?? "").join("").trim() ?? "";
 }
 
-function userFacingUnavailable(lastHint: string): string {
-  if (/high demand/i.test(lastHint) || /try again later/i.test(lastHint) || /overloaded/i.test(lastHint)) {
-    return "Google AI is busy right now. Wait a minute and try again.";
-  }
-  return lastHint ? `Ustad unavailable: ${lastHint}` : "Ustad couldn't answer. Try again shortly.";
+function shouldTryNextModel(status: number): boolean {
+  return status === 400 || status === 404 || status === 429 || status === 500 || status === 502 || status === 503;
 }
 
 export async function askUstad(opts: { history: ChatTurn[]; message: string; vehicleContext?: string }): Promise<string> {
   const key = process.env.GEMINI_API_KEY?.trim();
-  if (!key) throw new AiUnavailable("AI Ustad is not configured. Add GEMINI_API_KEY on Vercel (Production), then redeploy.");
+  if (!key) {
+    console.error("[ai/ustad] GEMINI_API_KEY is missing");
+    throw new AiUnavailable(USTAD_OFFLINE_MSG);
+  }
 
   const history = normalizeHistory(opts.history);
   const system = opts.vehicleContext ? `${SYSTEM}\n\nGaari ki maloomat:\n${opts.vehicleContext}` : SYSTEM;
-  let lastStatus = 0;
-  let lastHint = "";
   const tried: string[] = [];
 
   for (const model of modelsToTry()) {
-    const res = await callGeminiWithRetries(model, system, history, opts.message, key);
-    lastStatus = res.status;
+    const res = await callModelWithBackoff(model, system, history, opts.message, key);
 
-    if (res.status === 429) throw new AiUnavailable("Free AI limit reached. Try again in a minute.");
     if (res.ok) {
       const text = extractText(await res.json());
       if (text) return text;
       tried.push(`${model}: empty reply`);
-      lastHint = "Empty response from model.";
       continue;
     }
 
@@ -168,17 +155,12 @@ export async function askUstad(opts: { history: ChatTurn[]; message: string; veh
       /* keep statusText */
     }
     tried.push(`${model}: ${hint}`);
-    lastHint = hint;
 
     if (res.status === 401 || res.status === 403) break;
-    if (retryableStatus(res.status)) continue;
+    if (shouldTryNextModel(res.status)) continue;
     break;
   }
 
-  if (lastStatus === 401 || lastStatus === 403) {
-    throw new AiUnavailable("Invalid Gemini API key. Check GEMINI_API_KEY in your environment.");
-  }
-
   console.error("[ai/ustad] all models failed:", tried.join(" | "));
-  throw new AiUnavailable(userFacingUnavailable(lastHint));
+  throw new AiUnavailable(USTAD_OFFLINE_MSG);
 }

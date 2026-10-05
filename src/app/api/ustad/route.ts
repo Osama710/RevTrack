@@ -1,4 +1,4 @@
-import { AiUnavailable, askUstad, type ChatTurn } from "@/lib/ai";
+import { AiUnavailable, USTAD_OFFLINE_MSG, askUstad, type ChatTurn } from "@/lib/ai";
 import { UUID_RE } from "@/lib/form";
 import { createClient } from "@/lib/supabase/server";
 import { VEHICLE_COLS } from "@/types/db";
@@ -60,8 +60,8 @@ export async function POST(req: Request) {
     await supabase.from("ai_assistant_logs").insert({ vehicle_id: vehicleId, role: "assistant", content: reply.slice(0, 6000) });
     return Response.json({ reply });
   } catch (e) {
-    const message = e instanceof AiUnavailable ? e.message : "Ustad couldn't answer. Try again shortly.";
-    console.error("[api/ustad]", message);
+    if (!(e instanceof AiUnavailable)) console.error("[api/ustad]", e);
+    const message = e instanceof AiUnavailable ? e.message : USTAD_OFFLINE_MSG;
     return err(message, e instanceof AiUnavailable ? 503 : 500);
   }
 }

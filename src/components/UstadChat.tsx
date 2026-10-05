@@ -63,11 +63,11 @@ export default function UstadChat({ initial }: { initial: Msg[] }) {
       });
       const data = (await res.json().catch(() => ({}))) as { reply?: string; error?: string };
       if (ac.signal.aborted) return;
-      if (!res.ok || !data.reply) throw new Error(data.error ?? "Ustad couldn't answer.");
+      if (!res.ok || !data.reply) throw new Error(data.error ?? "Ustad is in the workshop, try again in a minute.");
       setMsgs((m) => [...m, { role: "assistant", content: data.reply as string }]);
     } catch (e) {
       if (ac.signal.aborted) return;
-      setError(e instanceof Error ? e.message : "Ustad couldn't answer.");
+      setError(e instanceof Error ? e.message : "Ustad is in the workshop, try again in a minute.");
     } finally {
       if (inflight.current === ac) inflight.current = null;
       if (!ac.signal.aborted) setSending(false);
@@ -105,8 +105,6 @@ export default function UstadChat({ initial }: { initial: Msg[] }) {
     e.preventDefault();
     send(input);
   };
-
-  const busy = error?.toLowerCase().includes("busy") ?? false;
 
   return (
     <div className="app-viewport relative flex h-dvh min-w-0 flex-col overflow-x-hidden">
@@ -161,11 +159,6 @@ export default function UstadChat({ initial }: { initial: Msg[] }) {
         {error && (
           <div role="alert" className="cut px-3 py-2.5 text-xs [--panel:rgb(255_61_110/0.08)]">
             <p className="text-redline">{error}</p>
-            {busy && (
-              <p className="mt-1.5 text-dim">
-                Yeh RevTrack ki ghalti nahi — Google AI Studio par abhi zyada load hai. 1–2 minute wait karein, phir dubara try karein.
-              </p>
-            )}
             {lastQuestion.current && (
               <button type="button" onClick={retryLast} disabled={sending} className="btn-cut-ghost mt-2 h-9 px-3 text-[11px] font-semibold uppercase">
                 Dubara bhejein
