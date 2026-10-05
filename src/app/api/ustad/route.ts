@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     return err("Bad request.", 400);
   }
   const message = typeof body.message === "string" ? body.message.trim() : "";
-  if (!message || message.length > 1000) return err("Write a message of up to 1000 characters.", 400);
+  if (!message || message.length > 2000) return err("Write a message of up to 2000 characters.", 400);
   const vehicleId = typeof body.vehicleId === "string" && UUID_RE.test(body.vehicleId) ? body.vehicleId : null;
 
   // Per-user hourly cap keeps the free AI quota from being burned by one account.

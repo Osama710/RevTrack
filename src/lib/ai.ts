@@ -13,7 +13,7 @@ Kabhi pakka diagnosis ka daawa na karein.`;
 
 export class AiUnavailable extends Error {}
 
-/** New AI Studio keys: use Gemini 3.x only (2.x is shut off for new users). */
+/** New AI Studio keys: Gemini 3.x only. Lite first — less likely to hit “high demand” on 3.8. */
 const DEFAULT_MODELS = ["gemini-3.5-flash-lite", "gemini-3.8-flash"];
 
 /** Map old env values to current model IDs. */
@@ -113,10 +113,11 @@ async function callGeminiWithRetries(
   key: string,
 ) {
   let last: Response | null = null;
-  for (let attempt = 0; attempt < 2; attempt++) {
+  const attempts = model.includes("flash-lite") ? 3 : 2;
+  for (let attempt = 0; attempt < attempts; attempt++) {
     last = await callGemini(model, system, history, message, key);
-    if (last.status === 503 && attempt < 1) {
-      await sleep(700);
+    if (last.status === 503 && attempt < attempts - 1) {
+      await sleep(600 * (attempt + 1));
       continue;
     }
     break;
@@ -130,7 +131,7 @@ function extractText(data: unknown): string {
 }
 
 function userFacingUnavailable(lastHint: string): string {
-  if (/high demand/i.test(lastHint) || /try again later/i.test(lastHint)) {
+  if (/high demand/i.test(lastHint) || /try again later/i.test(lastHint) || /overloaded/i.test(lastHint)) {
     return "Google AI is busy right now. Wait a minute and try again.";
   }
   return lastHint ? `Ustad unavailable: ${lastHint}` : "Ustad couldn't answer. Try again shortly.";

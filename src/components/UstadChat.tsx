@@ -3,7 +3,7 @@
 import { clearUstadHistory } from "@/app/(app)/actions";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import BackLink from "@/components/ui/BackLink";
-import CarLoader from "@/components/CarLoader";
+import UstadThinking from "@/components/UstadThinking";
 import { useGarage } from "@/components/garage-context";
 import { IconSend } from "@/components/icons";
 
@@ -29,6 +29,7 @@ export default function UstadChat({ initial }: { initial: Msg[] }) {
   const [error, setError] = useState<string | null>(null);
   const end = useRef<HTMLDivElement>(null);
   const inflight = useRef<AbortController | null>(null);
+  const lastQuestion = useRef<string | null>(null);
 
   useEffect(() => {
     const el = end.current;
@@ -40,16 +41,16 @@ export default function UstadChat({ initial }: { initial: Msg[] }) {
 
   useEffect(() => () => inflight.current?.abort(), []);
 
-  async function send(text: string) {
-    const message = text.trim();
-    if (!message || sending) return;
-
+  async function requestUstad(message: string, addUserBubble: boolean) {
     inflight.current?.abort();
     const ac = new AbortController();
     inflight.current = ac;
 
-    setMsgs((m) => [...m, { role: "user", content: message }]);
-    setInput("");
+    if (addUserBubble) {
+      setMsgs((m) => [...m, { role: "user", content: message }]);
+      setInput("");
+    }
+    lastQuestion.current = message;
     setSending(true);
     setError(null);
 
@@ -73,11 +74,24 @@ export default function UstadChat({ initial }: { initial: Msg[] }) {
     }
   }
 
+  function send(text: string) {
+    const message = text.trim();
+    if (!message || sending) return;
+    void requestUstad(message, true);
+  }
+
+  function retryLast() {
+    const q = lastQuestion.current;
+    if (!q || sending) return;
+    void requestUstad(q, false);
+  }
+
   async function clearChat() {
     if (clearing || sending) return;
     setClearing(true);
     setError(null);
     setMsgs([]);
+    lastQuestion.current = null;
     try {
       await clearUstadHistory();
     } catch {
@@ -89,12 +103,13 @@ export default function UstadChat({ initial }: { initial: Msg[] }) {
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
-    void send(input);
+    send(input);
   };
+
+  const busy = error?.toLowerCase().includes("busy") ?? false;
 
   return (
     <div className="app-viewport relative flex h-dvh min-w-0 flex-col overflow-x-hidden">
-      {sending && <CarLoader fullscreen label="Ustad soch raha hai… (30 sec tak lag sakta hai)" />}
       <header className="flex items-start justify-between gap-2 border-b border-line/60 px-4 pb-2 pt-[calc(env(safe-area-inset-top)+8px)]">
         <div className="flex items-center gap-1">
           <BackLink href="/garage" />
@@ -116,13 +131,13 @@ export default function UstadChat({ initial }: { initial: Msg[] }) {
       </header>
 
       <div role="log" aria-live="polite" className="flex-1 space-y-2 overflow-y-auto px-4 py-3">
-        {msgs.length === 0 && (
+        {msgs.length === 0 && !sending && (
           <div className="cut p-3">
             <p className="font-mono text-[11px] text-mint">ustad@revtrack</p>
             <p className="mt-1.5 text-xs text-dim">Masla Roman-Urdu mein likhein ya neeche se chunein.</p>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {QUICK.map((q) => (
-                <button key={q} type="button" onClick={() => void send(q)} disabled={sending} className="cut cut-sm px-2.5 py-1.5 text-[11px] text-dim disabled:opacity-40">
+                <button key={q} type="button" onClick={() => send(q)} disabled={sending} className="cut cut-sm px-2.5 py-1.5 text-[11px] text-dim disabled:opacity-40">
                   {q}
                 </button>
               ))}
@@ -142,10 +157,22 @@ export default function UstadChat({ initial }: { initial: Msg[] }) {
             <p className="whitespace-pre-wrap leading-relaxed">{m.content}</p>
           </div>
         ))}
-        {sending && msgs.length > 0 && msgs[msgs.length - 1]?.role === "user" && (
-          <p className="text-[11px] text-dim">Ustad jawab likh raha hai…</p>
+        {sending && <UstadThinking vehicleName={vehicle?.name} />}
+        {error && (
+          <div role="alert" className="cut px-3 py-2.5 text-xs [--panel:rgb(255_61_110/0.08)]">
+            <p className="text-redline">{error}</p>
+            {busy && (
+              <p className="mt-1.5 text-dim">
+                Yeh RevTrack ki ghalti nahi — Google AI Studio par abhi zyada load hai. 1–2 minute wait karein, phir dubara try karein.
+              </p>
+            )}
+            {lastQuestion.current && (
+              <button type="button" onClick={retryLast} disabled={sending} className="btn-cut-ghost mt-2 h-9 px-3 text-[11px] font-semibold uppercase">
+                Dubara bhejein
+              </button>
+            )}
+          </div>
         )}
-        {error && <p role="alert" className="cut px-3 py-2 text-xs text-redline [--panel:rgb(255_61_110/0.1)]">{error}</p>}
         <div ref={end} />
       </div>
 
@@ -153,7 +180,7 @@ export default function UstadChat({ initial }: { initial: Msg[] }) {
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          maxLength={1000}
+          maxLength={2000}
           enterKeyHint="send"
           disabled={sending}
           aria-label="Describe the problem"
