@@ -13,11 +13,19 @@ Kabhi pakka diagnosis ka daawa na karein.`;
 
 export class AiUnavailable extends Error {}
 
-const DEFAULT_MODELS = ["gemini-2.0-flash", "gemini-2.5-flash", "gemini-1.5-flash", "gemini-1.5-flash-8b"];
+/** Models that work with AI Studio keys on generateContent (2025+). */
+const DEFAULT_MODELS = [
+  "gemini-2.5-flash",
+  "gemini-2.0-flash",
+  "gemini-2.5-flash-lite",
+  "gemini-3.8-flash",
+];
+
+const DEPRECATED = new Set(["gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-1.5-pro"]);
 
 function modelsToTry(): string[] {
   const preferred = process.env.GEMINI_MODEL?.trim();
-  const list = preferred ? [preferred, ...DEFAULT_MODELS] : DEFAULT_MODELS;
+  const list = preferred && !DEPRECATED.has(preferred) ? [preferred, ...DEFAULT_MODELS] : DEFAULT_MODELS;
   return [...new Set(list.filter(Boolean))];
 }
 
@@ -42,7 +50,23 @@ function retryableStatus(status: number): boolean {
   return status === 400 || status === 404 || status === 500 || status === 502 || status === 503;
 }
 
-async function callGemini(model: string, system: string, history: ChatTurn[], message: string, key: string) {
+function generationConfig(model: string) {
+  const base = { temperature: 0.45, maxOutputTokens: 900 };
+  // Fast chat: no extended "thinking" (can fail or slow on free tier).
+  if (/gemini-2\.5|gemini-3/i.test(model)) {
+    return { ...base, thinkingConfig: { thinkingBudget: 0 } };
+  }
+  return base;
+}
+
+async function callGeminiOnce(
+  apiVersion: "v1beta" | "v1",
+  model: string,
+  system: string,
+  history: ChatTurn[],
+  message: string,
+  key: string,
+) {
   const contents = [
     ...history.map((m) => ({
       role: m.role === "assistant" ? "model" : "user",
@@ -51,17 +75,23 @@ async function callGemini(model: string, system: string, history: ChatTurn[], me
     { role: "user", parts: [{ text: message }] },
   ];
 
-  return fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+  return fetch(`https://generativelanguage.googleapis.com/${apiVersion}/models/${encodeURIComponent(model)}:generateContent`, {
     method: "POST",
     headers: { "Content-Type": "application/json", "x-goog-api-key": key },
     body: JSON.stringify({
       systemInstruction: { parts: [{ text: system }] },
       contents,
-      generationConfig: { temperature: 0.45, maxOutputTokens: 900 },
+      generationConfig: generationConfig(model),
     }),
     signal: AbortSignal.timeout(28_000),
     cache: "no-store",
   });
+}
+
+async function callGemini(model: string, system: string, history: ChatTurn[], message: string, key: string) {
+  const v1beta = await callGeminiOnce("v1beta", model, system, history, message, key);
+  if (v1beta.status !== 404) return v1beta;
+  return callGeminiOnce("v1", model, system, history, message, key);
 }
 
 function extractText(data: unknown): string {
@@ -77,6 +107,7 @@ export async function askUstad(opts: { history: ChatTurn[]; message: string; veh
   const system = opts.vehicleContext ? `${SYSTEM}\n\nGaari ki maloomat:\n${opts.vehicleContext}` : SYSTEM;
   let lastStatus = 0;
   let lastHint = "";
+  const tried: string[] = [];
 
   for (const model of modelsToTry()) {
     const res = await callGemini(model, system, history, opts.message, key);
@@ -86,16 +117,20 @@ export async function askUstad(opts: { history: ChatTurn[]; message: string; veh
     if (res.ok) {
       const text = extractText(await res.json());
       if (text) return text;
+      tried.push(`${model}: empty reply`);
       lastHint = "Empty response from model.";
       continue;
     }
 
+    let hint = res.statusText;
     try {
       const err = (await res.json()) as { error?: { message?: string } };
-      lastHint = err.error?.message ?? res.statusText;
+      hint = err.error?.message ?? hint;
     } catch {
-      lastHint = res.statusText;
+      /* keep statusText */
     }
+    tried.push(`${model}: ${hint}`);
+    lastHint = hint;
 
     if (res.status === 401 || res.status === 403) break;
     if (retryableStatus(res.status)) continue;
@@ -106,5 +141,8 @@ export async function askUstad(opts: { history: ChatTurn[]; message: string; veh
     throw new AiUnavailable("Invalid Gemini API key. Check GEMINI_API_KEY in your environment.");
   }
 
-  throw new AiUnavailable(lastHint ? `Ustad unavailable: ${lastHint}` : "Ustad couldn't answer. Try again shortly.");
+  console.error("[ai/ustad] all models failed:", tried.join(" | "));
+  throw new AiUnavailable(
+    lastHint ? `Ustad unavailable: ${lastHint}` : "Ustad couldn't answer. Try again shortly.",
+  );
 }
