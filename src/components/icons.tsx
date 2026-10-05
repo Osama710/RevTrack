@@ -96,3 +96,28 @@ export const IconSend = (p: P) => (
     <path d="M4 12l16-8-6 16-3-7z" />
   </Icon>
 );
+export const IconCopy = (p: P) => (
+  <Icon {...p}>
+    <rect x="8" y="8" width="12" height="12" rx="1" />
+    <path d="M6 16H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" />
+  </Icon>
+);
+export const IconShare = (p: P) => (
+  <Icon {...p}>
+    <path d="M12 16V4m0 0l4 4m-4-4L8 8" />
+    <path d="M4 14v4h16v-4" />
+  </Icon>
+);
+export const IconPencil = (p: P) => (
+  <Icon {...p}>
+    <path d="M4 20h4l10-10-4-4L4 16v4z" />
+    <path d="M13 7l4 4" />
+  </Icon>
+);
+export const IconSmile = (p: P) => (
+  <Icon {...p}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+    <path d="M9 9h.01M15 9h.01" />
+  </Icon>
+);

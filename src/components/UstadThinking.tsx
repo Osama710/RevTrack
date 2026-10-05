@@ -1,33 +1,35 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
 
-export default function UstadThinking({ vehicleName }: { vehicleName?: string | null }) {
-  const hints = useMemo(
-    () => [
-      "Masla parh raha hoon…",
-      vehicleName ? `${vehicleName} ke hisaab se soch raha hoon…` : "Gaari ke masle samajh raha hoon…",
-      "Mechanic ki tarah check kar raha hoon…",
-      "Jawab likh raha hoon…",
-    ],
-    [vehicleName],
-  );
-  const [i, setI] = useState(0);
-
-  useEffect(() => {
-    const t = setInterval(() => setI((n) => (n + 1) % hints.length), 2400);
-    return () => clearInterval(t);
-  }, [hints]);
-
+export default function UstadThinking() {
   return (
-    <div className="mr-4 cut cut-sm px-3 py-2.5 text-xs" aria-busy="true" aria-label="Ustad is thinking">
-      <p className="mb-1 font-mono text-[10px] text-mint">ustad</p>
-      <p className="text-dim">{hints[i]}</p>
-      <p className="ustad-dots mt-2" aria-hidden>
-        <span />
-        <span />
-        <span />
-      </p>
-    </div>
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex gap-2.5 pr-1"
+      aria-busy="true"
+      aria-label="Ustad is thinking"
+    >
+      <span className="ustad-avatar ustad-avatar-pulse mt-0.5 grid size-8 shrink-0 place-items-center font-display text-xs font-bold text-obsidian-950">
+        U
+      </span>
+      <div className="min-w-0 flex-1 pt-0.5">
+        <p className="font-mono text-[10px] font-medium uppercase tracking-wider text-mint">Ustad</p>
+        <div className="mt-2 cut cut-sm max-w-[14rem] px-3 py-2.5 [--panel:rgb(17_17_26/0.9)]">
+          <p className="flex items-center gap-1 text-sm text-dim">
+            Soch raha hoon
+            <span className="ustad-dots" aria-hidden>
+              <span />
+              <span />
+              <span />
+            </span>
+          </p>
+          <div className="mt-2.5 h-1 overflow-hidden rounded-full bg-obsidian-800">
+            <div className="ustad-think-bar h-full rounded-full bg-gradient-to-r from-mint/20 via-mint to-mint/20" />
+          </div>
+        </div>
+      </div>
+    </motion.div>
   );
 }
